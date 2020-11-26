@@ -1,7 +1,7 @@
 # Docker
 
 This directory provides the user with a method to quickly build and test the
-Micro-ROS tutorials in a docker container.  Scripts are provided to
+Gazebo model and plugin in a docker container.  Scripts are provided to
 create the docker image and to start, stop and attach to the docker container.
 
 NOTES: This docker is only suitable for the agent and Linux host builds.
@@ -9,7 +9,7 @@ NOTES: This docker is only suitable for the agent and Linux host builds.
 ## Basic operation
 
 The script `./build.bash` creates the docker container.  Do this
-just once!  This process took about 5 minutes on my PC, so get on with
+just once!  This process took about 10 minutes on my PC, so get on with
 something else while the image is built.
 
 To start the container, use `./start.bash`.  This script starts the
@@ -38,19 +38,14 @@ the script as many times as needed.
 
 ## Setting up the workspace for the first time
 
-The workspace needs to be created and the `agent` directory needs to be
-linked into the new workspace.  To make this easier, two scripts have been
-added.
-
-The script `setup_agent.bash` clones the Micro-ROS setup repo and builds the
-agent.  This gets most of the time consuming cloning and first time build work
-out of the way.  To run, attach a terminal shell to the docker and then run:
+In a shell that you started using `attach.bash`, run Gazebo to make sure that
+you have everything setup correctly.  This also creates the `~/.gazebo`
+directory.  Shutdown Gazebo.  Run the command
 
 ```bash
-cd ~/ws
-./setup_agent.bash
+ln -s ~/code/models .gazebo/
 ```
 
-The second script, `setup_app.bash`, mounts the `esp32_bot` directory into
-the workspace at `~/code`, links in the other packages and builds them.
-Run it the same way as the first script.
+to link the models directory from the repo to where Gazebo can find it.  You
+should now be able to start Gazebo and to add the test cam model in to the
+empty world.

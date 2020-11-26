@@ -5,7 +5,7 @@ set -x
 
 docker_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &>/dev/null && pwd )"
 . ${docker_dir}/vars.bash
-CODE_DIR=${docker_dir}/../..
+CODE_DIR=${docker_dir}/..
 
 mkdir -p ${WORKSPACE_DIR}
 
