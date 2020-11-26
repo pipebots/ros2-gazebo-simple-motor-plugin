@@ -1,0 +1,52 @@
+# Use this to build and run the Micro-ROS agent.
+
+FROM ros:foxy-ros-base-focal
+
+# Allow apt install to work properly.
+ENV DEBIAN_FRONTEND noninteractive
+# Use computer locale to allow for improved scripting.
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+# nvidia-container-runtime
+ENV NVIDIA_VISIBLE_DEVICES \
+    ${NVIDIA_VISIBLE_DEVICES:-all}
+ENV NVIDIA_DRIVER_CAPABILITIES \
+    ${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+# Install ROS2 desktop packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ros-foxy-desktop \
+    ros-foxy-rqt \
+    && rm -rf /var/lib/apt/lists/*
+
+# Add an editor and a few other useful packages.
+# Install ccache to speed up builds.
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3-pip \
+    vim \
+    ccache \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup links for ccache
+RUN cd /usr/local/bin/ \
+    && ln -s ccache gcc && ln -s ccache g++ \
+    && ln -s ccache cc && ln -s ccache c++
+
+# Create user with UID and GID matching those on my PC.
+# This allows the user to delete build products created in the source tree.
+# Also add user build to sudoers list.
+RUN groupadd -g 1000 build && \
+    useradd -u 1000 -g 1000 -m -s /bin/bash build && \
+    echo "build ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/build && \
+    chmod 0440 /etc/sudoers.d/build
+ENV HOME /home/build
+
+# Change ownership of build directory to build:build.
+RUN chown -R build:build /home/build/
+
+# Change to user build.
+USER build
+
+# Source the ROS setup bash file for every new shell.
+RUN echo ". /opt/ros/foxy/setup.bash" >> ~/.bash_aliases
