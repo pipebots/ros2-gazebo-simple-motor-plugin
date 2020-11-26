@@ -8,7 +8,6 @@ docker_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &>/dev/null && pwd )"
 CODE_DIR=${docker_dir}/../..
 
 mkdir -p ${WORKSPACE_DIR}
-cp ${docker_dir}/setup_*.bash ${WORKSPACE_DIR}
 
 docker container inspect ${CONTAINER_NAME} &> /dev/null
 if [ $? == 0 ]
@@ -27,12 +26,12 @@ else
     # Container does not exist so run it.
 
     # Setup X window for the container to use.
-    XAUTH=/tmp/.docker.xauth
     if [ ! -f $XAUTH ]
     then
         xauth_list=$(xauth nlist :0 | sed -e 's/^..../ffff/')
         if [ ! -z "$xauth_list" ]
         then
+            touch $XAUTH
             echo $xauth_list | xauth -f $XAUTH nmerge -
         else
             touch $XAUTH
@@ -46,8 +45,6 @@ else
         --tty \
         --net=host \
         --name ${CONTAINER_NAME} \
-        --device=/dev/input/js0 \
-        --device=/dev/usb/hiddev0 \
         --volume ${CODE_DIR}:/home/build/code \
         --volume ${WORKSPACE_DIR}:/home/build/ws \
         --env="DISPLAY=$DISPLAY" \
