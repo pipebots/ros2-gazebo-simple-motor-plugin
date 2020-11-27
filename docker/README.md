@@ -49,3 +49,18 @@ ln -s ~/code/models .gazebo/
 to link the models directory from the repo to where Gazebo can find it.  You
 should now be able to start Gazebo and to add the test cam model in to the
 empty world.
+
+## References
+
+<http://wiki.ros.org/docker/Tutorials/GUI>
+
+## Known issues
+
+The X authority code that was previously used seems to not be needed any more
+and has been removed from the code.
+
+Only tested on Ubuntu 18.04LTS system.
+
+Batch files need to be written for Windows PCs.
+This looks useful <https://dev.to/darksmile92/run-gui-app-in-linux-docker-container-on-windows-host-4kde>
+

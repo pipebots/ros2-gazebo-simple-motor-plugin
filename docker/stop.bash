@@ -13,4 +13,3 @@ then
 else
     echo "Docker '${CONTAINER_NAME}' already stopped."
 fi
-rm -rf $XAUTH

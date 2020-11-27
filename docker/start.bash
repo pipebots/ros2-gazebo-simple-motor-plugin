@@ -19,26 +19,12 @@ then
         echo "Container '${CONTAINER_NAME}' is already running."
     else
         # Container exists but is not running.
-        docker container start ${CONTAINER_NAME} &> /dev/null
+        docker container start ${CONTAINER_NAME}
+        # docker container start ${CONTAINER_NAME} &> /dev/null
         echo "Container '${CONTAINER_NAME}' started."
     fi
 else
     # Container does not exist so run it.
-
-    # Setup X window for the container to use.
-    if [ ! -f $XAUTH ]
-    then
-        xauth_list=$(xauth nlist :0 | sed -e 's/^..../ffff/')
-        if [ ! -z "$xauth_list" ]
-        then
-            touch $XAUTH
-            echo $xauth_list | xauth -f $XAUTH nmerge -
-        else
-            touch $XAUTH
-        fi
-        chmod a+r $XAUTH
-    fi
-
     # Run container.
     docker container run \
         --detach \
