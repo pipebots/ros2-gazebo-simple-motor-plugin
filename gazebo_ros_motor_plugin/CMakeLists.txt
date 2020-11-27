@@ -17,9 +17,50 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-# uncomment the following section in order to fill in
-# further dependencies manually.
-# find_package(<dependency> REQUIRED)
+find_package(gazebo_dev REQUIRED)
+# find_package(gazebo_msgs REQUIRED)
+find_package(gazebo_ros REQUIRED)
+# find_package(geometry_msgs REQUIRED)
+# find_package(image_transport REQUIRED)
+# find_package(cv_bridge REQUIRED)
+# find_package(nav_msgs REQUIRED)
+find_package(rclcpp REQUIRED)
+# find_package(sensor_msgs REQUIRED)
+# find_package(std_msgs REQUIRED)
+# find_package(std_srvs REQUIRED)
+# find_package(tf2 REQUIRED)
+# find_package(tf2_geometry_msgs REQUIRED)
+# find_package(tf2_ros REQUIRED)
+# find_package(trajectory_msgs REQUIRED)
+
+# gazebo_ros_motor_plugin
+add_library(${PROJECT_NAME} SHARED
+  src/${PROJECT_NAME}.cpp
+)
+
+target_include_directories(${PROJECT_NAME} PUBLIC include)
+
+ament_target_dependencies(${PROJECT_NAME}
+  "gazebo_dev"
+  "gazebo_ros"
+  # "geometry_msgs"
+  # "nav_msgs"
+  "rclcpp"
+  # "tf2"
+  # "tf2_geometry_msgs"
+  # "tf2_ros"
+)
+ament_export_libraries(${PROJECT_NAME})
+
+install(DIRECTORY include/
+        DESTINATION include)
+
+install(TARGETS
+  ${PROJECT_NAME}
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -30,6 +71,19 @@ if(BUILD_TESTING)
   # uncomment the line when this package is not in a git repo
   #set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
+
+  # Inspired by https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_plugins/test/CMakeLists.txt
+  find_package(ament_cmake_gtest REQUIRED)
+  ament_add_gtest(test_${PROJECT_NAME}
+    test/test_${PROJECT_NAME}.cpp
+    WORKING_DIRECTORY
+      ${CMAKE_CURRENT_BINARY_DIR}
+    TIMEOUT
+      120
+  )
+  target_link_libraries(test_${PROJECT_NAME}
+    gazebo_test_fixture
+  )
 endif()
 
 ament_package()
