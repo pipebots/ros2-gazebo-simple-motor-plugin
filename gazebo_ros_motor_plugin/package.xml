@@ -3,9 +3,9 @@
 <package format="3">
   <name>gazebo_ros_motor_plugin</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
-  <maintainer email="build@todo.todo">build</maintainer>
-  <license>TODO: License declaration</license>
+  <description>Gazebo ROS2 Motor Plugin</description>
+  <maintainer email="a.j.blight@leeds.ac.uk">build</maintainer>
+  <license>MIT</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
