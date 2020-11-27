@@ -1,38 +1,52 @@
-#include <functional>
-#include <gazebo/gazebo.hh>
-#include <gazebo/physics/physics.hh>
-#include <gazebo/common/common.hh>
-#include <ignition/math/Vector3.hh>
+#include <gazebo_ros_motor_plugin/gazebo_ros_motor_plugin.hpp>
+
+#include <gazebo_ros/node.hpp>
+#include <sdf/sdf.hh>
+
 
 namespace gazebo
 {
-  class ModelPush : public ModelPlugin
-  {
-    public: void Load(physics::ModelPtr _parent, sdf::ElementPtr /*_sdf*/)
-    {
-      // Store the pointer to the model
-      this->model = _parent;
 
-      // Listen to the update event. This event is broadcast every
-      // simulation iteration.
-      this->updateConnection = event::Events::ConnectWorldUpdateBegin(
-          std::bind(&ModelPush::OnUpdate, this));
-    }
+class GazeboRosMotorPrivate
+{
+public:
 
-    // Called by the world update start event
-    public: void OnUpdate()
-    {
-      // Apply a small linear velocity to the model.
-      this->model->SetLinearVel(ignition::math::Vector3d(.3, 0, 0));
-    }
 
-    // Pointer to the model
-    private: physics::ModelPtr model;
+  /// Pointer to model.
+  gazebo::physics::ModelPtr model_;
 
-    // Pointer to the update event connection
-    private: event::ConnectionPtr updateConnection;
-  };
+  /// A pointer to the GazeboROS node.
+  gazebo_ros::Node::SharedPtr ros_node_;
 
-  // Register this plugin with the simulator
-  GZ_REGISTER_MODEL_PLUGIN(ModelPush)
+};
+
+GazeboRosMotor::GazeboRosMotor()
+: impl_(std::make_unique<GazeboRosMotorPrivate>())
+{
 }
+
+GazeboRosMotor::~GazeboRosMotor()
+{
+}
+
+void GazeboRosMotor::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
+{
+  impl_->model_ = _model;
+
+  // Initialize ROS node
+  impl_->ros_node_ = gazebo_ros::Node::Get(_sdf);
+
+  // Get QoS profiles
+  // Needed for subscribers.
+//   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
+
+  }
+
+void GazeboRosMotor::Reset()
+{
+}
+
+// Register this plugin with the simulator
+GZ_REGISTER_MODEL_PLUGIN(GazeboRosMotor)
+
+}  // namespace gazebo
