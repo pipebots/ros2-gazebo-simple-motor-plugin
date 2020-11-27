@@ -129,8 +129,7 @@ but the connections to Gazebo are a little more tricky.
 Gazebo to plugin: The plugin gains access to the `gazebo::physics::ModelPtr`
 in the `Load` function and uses the Gazebo model in `UpdateOdometryWorld`.
 
-Plugin to Gazebo: ?
-
+Plugin to Gazebo: ?  TODO
 
 ## Developing the new plugin
 
@@ -138,4 +137,8 @@ Plugin to Gazebo: ?
 
 Other people seem to build their plugins as ROS packages, so I'll do the same.
 
+Setup an empty shell class based on the approach used by diff_drive.
 
+Added a new message to control the motor.
+
+Added subscriber and tested.

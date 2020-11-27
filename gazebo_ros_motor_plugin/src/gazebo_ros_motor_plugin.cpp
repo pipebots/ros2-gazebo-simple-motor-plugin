@@ -20,6 +20,8 @@ public:
 
 };
 
+
+
 GazeboRosMotor::GazeboRosMotor()
 : impl_(std::make_unique<GazeboRosMotorPrivate>())
 {

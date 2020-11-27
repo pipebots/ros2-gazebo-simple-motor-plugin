@@ -33,6 +33,12 @@ find_package(rclcpp REQUIRED)
 # find_package(tf2_ros REQUIRED)
 # find_package(trajectory_msgs REQUIRED)
 
+# find_package(rosidl_default_generators REQUIRED)
+
+# rosidl_generate_interfaces(${PROJECT_NAME}
+#   "msg/MotorControl.msg"
+# )
+
 # gazebo_ros_motor_plugin
 add_library(${PROJECT_NAME} SHARED
   src/${PROJECT_NAME}.cpp
@@ -50,10 +56,12 @@ ament_target_dependencies(${PROJECT_NAME}
   # "tf2_geometry_msgs"
   # "tf2_ros"
 )
+
 ament_export_libraries(${PROJECT_NAME})
 
 install(DIRECTORY include/
-        DESTINATION include)
+        DESTINATION include
+)
 
 install(TARGETS
   ${PROJECT_NAME}
