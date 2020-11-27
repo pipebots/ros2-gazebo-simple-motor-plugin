@@ -128,3 +128,14 @@ but the connections to Gazebo are a little more tricky.
 
 Gazebo to plugin: The plugin gains access to the `gazebo::physics::ModelPtr`
 in the `Load` function and uses the Gazebo model in `UpdateOdometryWorld`.
+
+Plugin to Gazebo: ?
+
+
+## Developing the new plugin
+
+<http://gazebosim.org/tutorials?tut=plugins_model&cat=write_plugin>
+
+Other people seem to build their plugins as ROS packages, so I'll do the same.
+
+
