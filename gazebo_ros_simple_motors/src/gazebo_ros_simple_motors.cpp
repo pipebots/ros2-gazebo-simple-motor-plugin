@@ -3,6 +3,8 @@
 #include <gazebo_ros/node.hpp>
 #include <sdf/sdf.hh>
 
+#include <memory>
+
 #include "rclcpp/rclcpp.hpp"
 
 #include "gazebo_ros_simple_motors_msgs/msg/motor_control.hpp"
@@ -26,15 +28,15 @@ public:
 
   /// Subscriber to command velocities
   rclcpp::Subscription<gazebo_ros_simple_motors_msgs::msg::MotorControl>::SharedPtr cmd_motors_;
-
 };
 
-void GazeboRosSimpleMotorsPrivate::OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg)
+void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
+  const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg)
 {
-  RCLCPP_INFO(ros_node_->get_logger(), "Received: motor %d, rpm %f",
+  RCLCPP_INFO(
+    ros_node_->get_logger(), "Received: motor %d, rpm %f",
     msg->motor, msg->rpm);
 }
-
 
 
 /*****************************************************************************/
@@ -58,13 +60,17 @@ void GazeboRosSimpleMotors::Load(gazebo::physics::ModelPtr _model, sdf::ElementP
   // Get QoS profiles.  USed by subscribers and publishers etc.
   const gazebo_ros::QoS & qos = impl_->ros_node_->get_qos();
 
-  impl_->cmd_motors_ = impl_->ros_node_->create_subscription<gazebo_ros_simple_motors_msgs::msg::MotorControl>(
+  impl_->cmd_motors_ =
+    impl_->ros_node_->create_subscription<gazebo_ros_simple_motors_msgs::msg::MotorControl>(
     "cmd_motors", qos.get_subscription_qos("cmd_motors", rclcpp::QoS(1)),
     std::bind(&GazeboRosSimpleMotorsPrivate::OnCmdMotors, impl_.get(), std::placeholders::_1));
 
   RCLCPP_INFO(
     impl_->ros_node_->get_logger(), "Subscribed to [%s]",
     impl_->cmd_motors_->get_topic_name());
+
+  RCLCPP_INFO(
+    impl_->ros_node_->get_logger(), "Attached to Gazebo");
 }
 
 void GazeboRosSimpleMotors::Reset()
