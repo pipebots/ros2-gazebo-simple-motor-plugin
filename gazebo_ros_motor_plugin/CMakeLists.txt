@@ -33,20 +33,40 @@ find_package(rclcpp REQUIRED)
 # find_package(tf2_ros REQUIRED)
 # find_package(trajectory_msgs REQUIRED)
 
-# find_package(rosidl_default_generators REQUIRED)
+# Messages.
+find_package(rosidl_default_generators REQUIRED)
 
-# rosidl_generate_interfaces(${PROJECT_NAME}
-#   "msg/MotorControl.msg"
-# )
+set(message_files
+  "msg/MotorControl.msg"
+)
 
-# gazebo_ros_motor_plugin
-add_library(${PROJECT_NAME} SHARED
+set(service_files
+)
+
+set(action_files
+)
+
+rosidl_generate_interfaces(${PROJECT_NAME}_messages  # FIXME Not sure the name is right.
+  ${message_files}
+  ${service_files}
+  ${action_files}
+)
+
+ament_export_dependencies(rosidl_default_runtime)
+
+# gazebo_ros_motor_plugin shared library
+
+set(library_name
+  lib${PROJECT_NAME}
+)
+
+add_library(${library_name} SHARED
   src/${PROJECT_NAME}.cpp
 )
 
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+target_include_directories(${library_name} PUBLIC include)
 
-ament_target_dependencies(${PROJECT_NAME}
+ament_target_dependencies(${library_name}
   "gazebo_dev"
   "gazebo_ros"
   # "geometry_msgs"
@@ -57,18 +77,19 @@ ament_target_dependencies(${PROJECT_NAME}
   # "tf2_ros"
 )
 
-ament_export_libraries(${PROJECT_NAME})
+ament_export_libraries(${library_name})
 
 install(DIRECTORY include/
         DESTINATION include
 )
 
 install(TARGETS
-  ${PROJECT_NAME}
+  ${library_name}  # FIXME Not sure the library should be installed where ever this is.
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
 )
+
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
