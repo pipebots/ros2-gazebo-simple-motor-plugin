@@ -1,4 +1,4 @@
-#include <gazebo_ros_motor_plugin/gazebo_ros_motor_plugin.hpp>
+#include <gazebo_ros_simple_motors/gazebo_ros_simple_motors.hpp>
 
 #include <gazebo_ros/node.hpp>
 #include <sdf/sdf.hh>

@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 3.5)
-project(gazebo_ros_motor_plugin)
+project(gazebo_ros_simple_motors)
+
+set(library_name
+  ${PROJECT_NAME}
+)
+
+set(test_name
+  test_${library_name}
+)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)
@@ -56,12 +64,8 @@ ament_export_dependencies(rosidl_default_runtime)
 
 # gazebo_ros_motor_plugin shared library
 
-set(library_name
-  lib${PROJECT_NAME}
-)
-
 add_library(${library_name} SHARED
-  src/${PROJECT_NAME}.cpp
+  src/${library_name}.cpp
 )
 
 target_include_directories(${library_name} PUBLIC include)
@@ -103,14 +107,14 @@ if(BUILD_TESTING)
 
   # Inspired by https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_plugins/test/CMakeLists.txt
   find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_${PROJECT_NAME}
-    test/test_${PROJECT_NAME}.cpp
+  ament_add_gtest(${test_name}
+    test/${test_name}.cpp
     WORKING_DIRECTORY
       ${CMAKE_CURRENT_BINARY_DIR}
     TIMEOUT
       120
   )
-  target_link_libraries(test_${PROJECT_NAME}
+  target_link_libraries(${test_name}
     gazebo_test_fixture
   )
 endif()
