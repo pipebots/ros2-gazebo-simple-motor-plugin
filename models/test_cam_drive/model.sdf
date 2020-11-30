@@ -1093,5 +1093,7 @@
     </joint>
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
+    <!-- Attach the plugin to this model -->
+    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so"/>
   </model>
 </sdf>

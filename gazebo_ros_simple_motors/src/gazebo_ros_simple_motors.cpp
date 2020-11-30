@@ -18,7 +18,7 @@ class GazeboRosSimpleMotorsPrivate
 public:
   /// Callback when a motors command is received.
   /// \param[in] _msg Motors command message.
-  void OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr _msg);
+  void OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg);
 
   /// Pointer to model.
   gazebo::physics::ModelPtr model_;
