@@ -141,9 +141,13 @@ Setup an empty shell class based on the approach used by diff_drive.
 
 Added a new message to control the motor.
 
-Added subscriber and tested.
-
 One thing I'm finding is that the Gazebo documentation is nearly all out of
 date.  ROS2 plugin tutorials don't exist!  Ignition (the replacement for
 Gazebo) has almost no documentation.
 
+After a batch of renaming to make the code match the approach used by
+`diff_drive`, decided to implement subscribe to listen to the new message and
+produce log output.
+
+One thing that caused me a load aof grief was getting the new MotorControl
+messages to be used.

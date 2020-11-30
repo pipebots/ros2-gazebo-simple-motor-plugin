@@ -1,6 +1,6 @@
 
-#ifndef GAZEBO_ROS_MOTOR_PLUGIN__GAZEBO_ROS_MOTOR_PLUGIN_HPP_
-#define GAZEBO_ROS_MOTOR_PLUGIN__GAZEBO_ROS_MOTOR_PLUGIN_HPP_
+#ifndef GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_
+#define GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -8,7 +8,7 @@
 
 namespace gazebo
 {
-class GazeboRosMotorPrivate;
+class GazeboRosSimpleMotorsPrivate;
 
 /**
  * @brief A simple motor plugin.
@@ -45,14 +45,14 @@ class GazeboRosMotorPrivate;
   \endcode
 */
 
-class GazeboRosMotor : public gazebo::ModelPlugin
+class GazeboRosSimpleMotors : public gazebo::ModelPlugin
 {
 public:
   /// Constructor
-  GazeboRosMotor();
+  GazeboRosSimpleMotors();
 
   /// Destructor
-  ~GazeboRosMotor();
+  ~GazeboRosSimpleMotors();
 
 protected:
   // Documentation inherited
@@ -63,9 +63,9 @@ protected:
 
 private:
   /// Private data pointer
-  std::unique_ptr<GazeboRosMotorPrivate> impl_;
+  std::unique_ptr<GazeboRosSimpleMotorsPrivate> impl_;
 };
 
 }  // namespace gazebo
 
-#endif  // GAZEBO_ROS_MOTOR_PLUGIN__GAZEBO_ROS_MOTOR_PLUGIN_HPP_
+#endif  // GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_

@@ -5,8 +5,13 @@ set(library_name
   ${PROJECT_NAME}
 )
 
+set(messages_name
+  # FIXME Not sure the name is right.
+  ${PROJECT_NAME}_msgs
+)
+
 set(test_name
-  test_${library_name}
+  test_${PROJECT_NAME}
 )
 
 # Default to C99
@@ -54,7 +59,7 @@ set(service_files
 set(action_files
 )
 
-rosidl_generate_interfaces(${PROJECT_NAME}_messages  # FIXME Not sure the name is right.
+rosidl_generate_interfaces(${messages_name}
   ${message_files}
   ${service_files}
   ${action_files}
@@ -62,13 +67,16 @@ rosidl_generate_interfaces(${PROJECT_NAME}_messages  # FIXME Not sure the name i
 
 ament_export_dependencies(rosidl_default_runtime)
 
-# gazebo_ros_motor_plugin shared library
+# gazebo_ros_simple_motors shared library.
 
 add_library(${library_name} SHARED
   src/${library_name}.cpp
 )
 
-target_include_directories(${library_name} PUBLIC include)
+target_include_directories(${library_name} PUBLIC
+  include
+  "$<INSTALL_INTERFACE:include>"
+)
 
 ament_target_dependencies(${library_name}
   "gazebo_dev"
