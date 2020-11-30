@@ -150,4 +150,6 @@ After a batch of renaming to make the code match the approach used by
 produce log output.
 
 One thing that caused me a load aof grief was getting the new MotorControl
-messages to be used.
+messages to be used.  After a lot of messing around trying to get them into
+the same package, I moved them out to a new package as I have done before
+and it worked.

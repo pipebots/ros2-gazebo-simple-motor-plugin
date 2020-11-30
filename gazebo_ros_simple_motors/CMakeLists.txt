@@ -5,11 +5,6 @@ set(library_name
   ${PROJECT_NAME}
 )
 
-set(messages_name
-  # FIXME Not sure the name is right.
-  ${PROJECT_NAME}_msgs
-)
-
 set(test_name
   test_${PROJECT_NAME}
 )
@@ -33,6 +28,7 @@ find_package(ament_cmake REQUIRED)
 find_package(gazebo_dev REQUIRED)
 # find_package(gazebo_msgs REQUIRED)
 find_package(gazebo_ros REQUIRED)
+find_package(gazebo_ros_simple_motors_msgs REQUIRED)
 # find_package(geometry_msgs REQUIRED)
 # find_package(image_transport REQUIRED)
 # find_package(cv_bridge REQUIRED)
@@ -46,27 +42,6 @@ find_package(rclcpp REQUIRED)
 # find_package(tf2_ros REQUIRED)
 # find_package(trajectory_msgs REQUIRED)
 
-# Messages.
-find_package(rosidl_default_generators REQUIRED)
-
-set(message_files
-  "msg/MotorControl.msg"
-)
-
-set(service_files
-)
-
-set(action_files
-)
-
-rosidl_generate_interfaces(${messages_name}
-  ${message_files}
-  ${service_files}
-  ${action_files}
-)
-
-ament_export_dependencies(rosidl_default_runtime)
-
 # gazebo_ros_simple_motors shared library.
 
 add_library(${library_name} SHARED
@@ -74,13 +49,14 @@ add_library(${library_name} SHARED
 )
 
 target_include_directories(${library_name} PUBLIC
-  include
-  "$<INSTALL_INTERFACE:include>"
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
 )
 
 ament_target_dependencies(${library_name}
   "gazebo_dev"
   "gazebo_ros"
+  "gazebo_ros_simple_motors_msgs"
   # "geometry_msgs"
   # "nav_msgs"
   "rclcpp"

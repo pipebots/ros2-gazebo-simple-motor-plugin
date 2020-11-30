@@ -8,9 +8,11 @@ mkdir -p src
 cd src
 
 # Link the plugin code into the workspace.
-ln -sf ~/code/gazebo_ros_motor_plugin/
+ln -sf ~/code/gazebo_ros_simple_motors_msgs
+ln -sf ~/code/gazebo_ros_simple_motors
 
 # Do the first build.
+cd ${HOME}/ws
 colcon build
 
 echo
