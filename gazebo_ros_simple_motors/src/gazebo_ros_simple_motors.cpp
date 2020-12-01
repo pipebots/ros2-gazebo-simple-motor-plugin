@@ -65,7 +65,7 @@ private:
 
 rclcpp::Logger GazeboRosSimpleMotorsPrivate::GetLogger()
 {
-    return ros_node_->get_logger();
+  return ros_node_->get_logger();
 }
 
 void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
@@ -98,16 +98,21 @@ void GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
 
 void GazeboRosSimpleMotorsPrivate::SetupMotors()
 {
-  // At this stage, we assume that there is only one motor.
-
-  // Get the cam_shaft joint
-  joint_ = model_->GetJoint("cam_shaft");
-
+#if 0
+  // TODO Handle multiple motors.
+  physics::Joint_V all_joints = model_->GetJoints();
+  for (auto const& joint: all_joints) {
+    RCLCPP_INFO(GetLogger(), "Joint [%s]", joint->GetScopedName());
+  }
+#else
+  // Get the joint
+  joint_ = model_->GetJoint("motor_shaft_joint");
   // Setup a P-controller, with a gain of 0.1.
   pid_ = common::PID(0.1, 0, 0);
-
   // Apply the P-controller to the joint.
   model_->GetJointController()->SetVelocityPID(joint_->GetScopedName(), pid_);
+  SetVelocity(0.0);
+#endif
 }
 
 /// \brief Set the rotational speed of the motor.
@@ -116,9 +121,9 @@ void GazeboRosSimpleMotorsPrivate::SetVelocity(const double &rpm)
 {
   // Convert RPM into velocity.
   // TODO Make this real!
-  double velocity = rpm;
+  double velocity = 1.0;
   // Set the joint's target velocity.
-  model_->GetJointController()->SetVelocityTarget(joint_->GetScopedName(), velocity);
+//   model_->GetJointController()->SetVelocityTarget(joint_->GetScopedName(), velocity);
 }
 
 /*****************************************************************************/
@@ -135,18 +140,19 @@ GazeboRosSimpleMotors::~GazeboRosSimpleMotors()
 void GazeboRosSimpleMotors::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
   // Safety check
-  if (model->GetJointCount() == 0) {
-    std::cerr << "Invalid joint count, plugin not loaded\n";
+  unsigned int joint_count = model->GetJointCount();
+  if (joint_count == 0) {
+    RCLCPP_ERR(impl_->GetLogger(), "Invalid joint count, plugin not loaded\n";
     return;
+  } else {
+    RCLCPP_INFO(impl_->GetLogger(), "Found %d joints", joint_count);
   }
 
   impl_->model_ = model;
-
   impl_->SetupROSNode(sdf);
   impl_->SetupMotors();
 
-  RCLCPP_INFO(
-    impl_->GetLogger(), "Attached to Gazebo");
+  RCLCPP_INFO(impl_->GetLogger(), "Attached to Gazebo");
 }
 
 void GazeboRosSimpleMotors::Reset()
