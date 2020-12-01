@@ -71,9 +71,7 @@ rclcpp::Logger GazeboRosSimpleMotorsPrivate::GetLogger()
 void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
   const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg)
 {
-  RCLCPP_INFO(
-    GetLogger(), "Received: motor %d, rpm %f",
-    msg->motor, msg->rpm);
+  RCLCPP_INFO(GetLogger(), "Received: motor %d, rpm %f", msg->motor, msg->rpm);
 
   SetVelocity(msg->rpm);
 }
@@ -102,7 +100,7 @@ void GazeboRosSimpleMotorsPrivate::SetupMotors()
   // TODO Handle multiple motors.
   physics::Joint_V all_joints = model_->GetJoints();
   for (auto const& joint: all_joints) {
-    RCLCPP_INFO(GetLogger(), "Joint [%s]", joint->GetScopedName());
+    RCLCPP_INFO(GetLogger(), "Loaded joint [%s]", joint->GetName());
   }
 #else
   // Get the joint
@@ -140,17 +138,17 @@ GazeboRosSimpleMotors::~GazeboRosSimpleMotors()
 void GazeboRosSimpleMotors::Load(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
   // Safety check
-  unsigned int joint_count = model->GetJointCount();
-  if (joint_count == 0) {
-    RCLCPP_ERR(impl_->GetLogger(), "Invalid joint count, plugin not loaded\n";
-    return;
-  } else {
-    RCLCPP_INFO(impl_->GetLogger(), "Found %d joints", joint_count);
-  }
+  // unsigned int joint_count = model->GetJointCount();
+  // if (joint_count == 0) {
+  //   RCLCPP_ERROR(impl_->GetLogger(), "Invalid joint count, plugin not loaded\n");
+  //   return;
+  // } else {
+  //   RCLCPP_INFO(impl_->GetLogger(), "Found %d joints", joint_count);
+  // }
 
-  impl_->model_ = model;
-  impl_->SetupROSNode(sdf);
-  impl_->SetupMotors();
+  // impl_->model_ = model;
+  // impl_->SetupROSNode(sdf);
+  // impl_->SetupMotors();
 
   RCLCPP_INFO(impl_->GetLogger(), "Attached to Gazebo");
 }
