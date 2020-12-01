@@ -25,7 +25,7 @@ Topic: /motors
 
 ```text
 uint8 motor  # Index of motor, 0 is first motor.
-float64 rpm  # RPM of motor. +ve is clockwise, -ve is anti-clockwise.
+float64 rpm  # RPM of motor.  +ve is clockwise, -ve is anti-clockwise.
 ```
 
 More parameters and options can be added later.
@@ -162,8 +162,11 @@ Trying to follow this:
 Decided to go down the route of setting up the Gazebo environment variables
 the way I want to use them.  This worked.
 
-I can now run the plugin, I can see the log info on the gazebo terminal and
-can see the ROS subscriber is set up as well.
+I can now run the plugin (instructions in `docker/README.md`), I can see the
+log info on the gazebo terminal and can see the ROS subscriber is set up as
+well.
+
+Now to make the plugin interact with the model.
 
 
 

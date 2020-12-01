@@ -22,9 +22,12 @@ SOFTWARE.
 
 #include "gazebo_ros_simple_motors/gazebo_ros_simple_motors.hpp"
 
+#include <common/common.hh>
 #include <gazebo_ros/node.hpp>
 #include <gazebo/physics/Model.hh>
+#include <physics/physics.hh>
 #include <sdf/sdf.hh>
+
 #include <rclcpp/rclcpp.hpp>
 #include <gazebo_ros_simple_motors_msgs/msg/motor_control.hpp>
 
@@ -37,31 +40,43 @@ namespace gazebo
 class GazeboRosSimpleMotorsPrivate
 {
 public:
+  rclcpp::Logger GetLogger();
   /// Callback when a motors command is received.
   /// \param[in] _msg Motors command message.
   void OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg);
 
   void SetupROSNode(sdf::ElementPtr sdf);
   void SetupMotors();
-
   /// Pointer to model.
   gazebo::physics::ModelPtr model_;
 
-  /// A pointer to the GazeboROS node.
-  gazebo_ros::Node::SharedPtr ros_node_;
+private:
+  void SetVelocity(const double &rpm);
 
-  /// Subscriber to command velocities
+  // A pointer to the GazeboROS node.
+  gazebo_ros::Node::SharedPtr ros_node_;
+  // Subscriber to command velocities
   rclcpp::Subscription<gazebo_ros_simple_motors_msgs::msg::MotorControl>::SharedPtr cmd_motors_;
+  // Pointer to the joint.
+  physics::JointPtr joint_;
+  // A PID controller for the joint.
+  common::PID pid_;
 };
+
+rclcpp::Logger GazeboRosSimpleMotorsPrivate::GetLogger()
+{
+    return ros_node_->get_logger();
+}
 
 void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
   const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg)
 {
   RCLCPP_INFO(
-    ros_node_->get_logger(), "Received: motor %d, rpm %f",
+    GetLogger(), "Received: motor %d, rpm %f",
     msg->motor, msg->rpm);
-}
 
+  SetVelocity(msg->rpm);
+}
 
 void GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
 {
@@ -77,14 +92,34 @@ void GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
     std::bind(&GazeboRosSimpleMotorsPrivate::OnCmdMotors, this, std::placeholders::_1));
 
   RCLCPP_INFO(
-    ros_node_->get_logger(), "Subscribed to [%s]",
+    GetLogger(), "Subscribed to [%s]",
     cmd_motors_->get_topic_name());
 }
 
 void GazeboRosSimpleMotorsPrivate::SetupMotors()
 {
+  // At this stage, we assume that there is only one motor.
+
+  // Get the cam_shaft joint
+  joint_ = model_->GetJoint("cam_shaft");
+
+  // Setup a P-controller, with a gain of 0.1.
+  pid_ = common::PID(0.1, 0, 0);
+
+  // Apply the P-controller to the joint.
+  model_->GetJointController()->SetVelocityPID(joint_->GetScopedName(), pid_);
 }
 
+/// \brief Set the rotational speed of the motor.
+/// \param[in] _vel New target revolutions per minute.
+void GazeboRosSimpleMotorsPrivate::SetVelocity(const double &rpm)
+{
+  // Convert RPM into velocity.
+  // TODO Make this real!
+  double velocity = rpm;
+  // Set the joint's target velocity.
+  model_->GetJointController()->SetVelocityTarget(joint_->GetScopedName(), velocity);
+}
 
 /*****************************************************************************/
 
@@ -111,7 +146,7 @@ void GazeboRosSimpleMotors::Load(gazebo::physics::ModelPtr model, sdf::ElementPt
   impl_->SetupMotors();
 
   RCLCPP_INFO(
-    impl_->ros_node_->get_logger(), "Attached to Gazebo");
+    impl_->GetLogger(), "Attached to Gazebo");
 }
 
 void GazeboRosSimpleMotors::Reset()

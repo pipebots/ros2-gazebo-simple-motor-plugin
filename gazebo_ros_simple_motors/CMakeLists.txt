@@ -51,6 +51,8 @@ add_library(${library_name} SHARED
 target_include_directories(${library_name} PUBLIC
   $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
   $<INSTALL_INTERFACE:include>
+  # FIXME The next line is a bit of a hack!
+  /usr/include/gazebo-11/gazebo
 )
 
 ament_target_dependencies(${library_name}
