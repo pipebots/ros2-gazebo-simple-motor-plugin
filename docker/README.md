@@ -38,17 +38,45 @@ the script as many times as needed.
 
 ## Setting up the workspace for the first time
 
-In a shell that you started using `attach.bash`, run Gazebo to make sure that
-you have everything setup correctly.  This also creates the `~/.gazebo`
-directory.  Shutdown Gazebo.  Run the command
+In a shell that you started using `attach.bash`, run `gazebo --verbose` to
+make sure that you have everything setup correctly.  This also creates the
+`~/.gazebo` directory.  Shutdown Gazebo.  Run the commands
 
 ```bash
-ln -s ~/code/models .gazebo/
+cd ~/ws
+./setup_ws.bash
+. ./setup_ws.bash
 ```
 
-to link the models directory from the repo to where Gazebo can find it.  You
-should now be able to start Gazebo and to add the test cam model in to the
-empty world.
+You should now be able to start Gazebo using `gazebo --verbose` and to add
+the test cam model in to the empty world from the insert menu.
+
+After adding an instance of the test cam model, the plugin should start and
+produce output similar to this:
+
+```text
+[INFO] [1606819477.922987992] [gazebo_ros_node]: ROS was initialized without arguments.
+[INFO] [1606819477.954836133] [simple_motors]: Subscribed to [/cmd_motors]
+[INFO] [1606819477.955216037] [simple_motors]: Attached to Gazebo
+```
+
+To test the plugin subscriber from the command line, open another terminal and
+attach to the docker.  Then run one or more of these commands:
+
+```bash
+$ ros2 topic list
+/clock
+/cmd_motors
+/parameter_events
+/rosout
+$ ros2 topic info /cmd_motors
+Type: gazebo_ros_simple_motors_msgs/msg/MotorControl
+Publisher count: 0
+Subscription count: 1
+$ ros2 topic pub --once /cmd_motors gazebo_ros_simple_motors_msgs/msg/MotorControl '{"motor": 1, "rpm": 10}'
+publisher: beginning loop
+publishing #1: gazebo_ros_simple_motors_msgs.msg.MotorControl(motor=1, rpm=10.0)
+```
 
 ## References
 

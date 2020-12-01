@@ -2,7 +2,7 @@
 
 ROS2 Foxy Gazebo 11 repo to develop a new Gazebo plugin.
 
-Setup instructions are in `docker/README.md`.
+Setup and basic test instructions are in `docker/README.md`.
 
 ## Developing the plugin
 
@@ -161,4 +161,9 @@ Trying to follow this:
 
 Decided to go down the route of setting up the Gazebo environment variables
 the way I want to use them.  This worked.
+
+I can now run the plugin, I can see the log info on the gazebo terminal and
+can see the ROS subscriber is set up as well.
+
+
 
