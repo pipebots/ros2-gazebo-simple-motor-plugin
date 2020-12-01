@@ -149,9 +149,16 @@ After a batch of renaming to make the code match the approach used by
 `diff_drive`, decided to implement subscribe to listen to the new message and
 produce log output.
 
-One thing that caused me a load aof grief was getting the new MotorControl
+One thing that caused me a load of grief was getting the new MotorControl
 messages to be used.  After a lot of messing around trying to get them into
 the same package, I moved the messages out to a new package as I have done
 before and it worked.
 
-How to run the new plugin?
+### How to run the new plugin?
+
+Trying to follow this:
+<http://gazebosim.org/tutorials?cat=guided_i&tut=guided_i5>
+
+Decided to go down the route of setting up the Gazebo environment variables
+the way I want to use them.  This worked.
+
