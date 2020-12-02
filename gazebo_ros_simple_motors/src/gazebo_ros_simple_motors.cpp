@@ -175,8 +175,8 @@ bool GazeboRosSimpleMotorsPrivate::SetupFromSDF(sdf::ElementPtr sdf)
   RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
   // HACK
   success = true;
-  shaft_max_rpm_ = 10.0;
-  shaft_target_rpm_ = 5.0;
+  shaft_max_rpm_ = 200.0;
+  shaft_target_rpm_ = 100.0;
 
   return success;
 }
@@ -199,11 +199,15 @@ void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
 
 void GazeboRosSimpleMotorsPrivate::UpdateShaftRPM()
 {
+  // Velocity is in radians per second.
+  // Convert using 1 rad/s = 9.55 rpm.
   const unsigned int axis = 0;
   const double increment_rpm = 0.1;
-  double current_rpm = joint_->GetVelocity(axis);
+  double current_rad_s = joint_->GetVelocity(axis);
+  double current_rpm = 9.55 * current_rad_s;
   double new_rpm = current_rpm;
   if (new_rpm > shaft_max_rpm_) {
+    // Maximum spped.
     new_rpm = shaft_max_rpm_;
   } else if (new_rpm < (shaft_target_rpm_ - increment_rpm)) {
     // Speed up.
@@ -216,7 +220,8 @@ void GazeboRosSimpleMotorsPrivate::UpdateShaftRPM()
     new_rpm = shaft_target_rpm_;
   }
   RCLCPP_INFO(GetLogger(), "Current %f, new %f", current_rpm, new_rpm);
-  joint_->SetVelocity(axis, new_rpm);
+  double new_rad_s = new_rpm / 9.55;
+  joint_->SetVelocity(axis, new_rad_s);
 }
 
 /*****************************************************************************/

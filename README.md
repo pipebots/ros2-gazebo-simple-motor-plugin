@@ -171,3 +171,9 @@ Now to make the plugin interact with the model.
 The tutorial I was trying to follow is so out of date it should be removed
 from the internet!  I ended up using the diff_drive plugin as a model and
 had much more success.
+
+After a lot of messing around, I have a spinning box on the end of a round
+motor shaft.  The interesting thing is trying to work out how to convert
+rpm into a velocity value.  A velocity value of 5 = 49rpm.  A search on the
+internet shows that values I have measured show that velocity in radians per
+second.  The formula to convert is: 1 rad/s = 9.55 r/min (rpm).
