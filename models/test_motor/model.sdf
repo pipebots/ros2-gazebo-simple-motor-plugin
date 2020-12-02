@@ -1,6 +1,6 @@
 <?xml version='1.0'?>
 <sdf version='1.7'>
-  <model name='motor_with_cam'>
+  <model name='test_motor'>
     <pose>0.0 0.0 0.2 0 -0 0</pose>
     <link name='motor_body'>
       <!-- <inertial>
@@ -61,8 +61,8 @@
         </material>
       </visual>
     </link>
-    <!-- <link name='disc'>
-      <pose>0 0 0.40 0 -0 0</pose> -->
+    <link name='rotor'>
+      <pose>0 0 0.35 0 -0 0</pose> -->
       <!-- <inertial>
         <mass>1</mass>
         <inertia>
@@ -75,20 +75,18 @@
         </inertia>
         <pose>0.0 0.0 1.2 0 -0 0</pose>
       </inertial> -->
-      <!-- <collision name='collision'>
+      <collision name='collision'>
         <geometry>
-          <cylinder>
-            <radius>0.4</radius>
-            <length>0.2</length>
-          </cylinder>
+          <box>
+            <size>0.2 0.1 0.1</size>
+          </box>
         </geometry>
       </collision>
       <visual name='visual'>
         <geometry>
-          <cylinder>
-            <radius>0.2</radius>
-            <length>0.2</length>
-          </cylinder>
+          <box>
+            <size>0.2 0.1 0.1</size>
+          </box>
         </geometry>
         <material>
           <script>
@@ -97,7 +95,7 @@
           </script>
         </material>
       </visual>
-    </link> -->
+    </link>
     <joint name="motor_shaft_joint" type="revolute">
       <pose>0 0 0 0 0 0</pose>
       <child>motor_shaft</child>
@@ -106,17 +104,17 @@
         <xyz>0 0 1</xyz>
       </axis>
     </joint>
-    <!-- <joint name="shaft_disc_joint" type="fixed">
+    <joint name="shaft_rotor_joint" type="fixed">
       <pose>0 0 0 0 0 0</pose>
-      <child>disc</child>
+      <child>rotor</child>
       <parent>motor_shaft</parent>
       <axis>
         <xyz>0 0 1</xyz>
       </axis>
-    </joint> -->
+    </joint>
     <static>1</static>
     <allow_auto_disable>1</allow_auto_disable>
     <!-- Attach the plugin to this model -->
-    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so"/>
+    <!-- <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so"/> -->
   </model>
 </sdf>
