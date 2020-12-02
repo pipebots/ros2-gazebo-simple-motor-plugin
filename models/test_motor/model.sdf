@@ -61,7 +61,7 @@
         </material>
       </visual>
     </link>
-    <link name='rotor'>
+    <link name='bar'>
       <pose>0 0 0.35 0 -0 0</pose> -->
       <!-- <inertial>
         <mass>1</mass>
@@ -104,17 +104,34 @@
         <xyz>0 0 1</xyz>
       </axis>
     </joint>
-    <joint name="shaft_rotor_joint" type="fixed">
+    <joint name="shaft_bar_joint" type="fixed">
       <pose>0 0 0 0 0 0</pose>
-      <child>rotor</child>
+      <child>bar</child>
       <parent>motor_shaft</parent>
       <axis>
         <xyz>0 0 1</xyz>
       </axis>
     </joint>
-    <static>1</static>
+    <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
     <!-- Attach the plugin to this model -->
-    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so"/>
+    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so">
+      <ros>
+        <!-- Add a ROS namespace.  No code needed for this to work.  See
+        https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_ros/include/gazebo_ros/node.hpp
+        for details of other options.
+        -->
+        <namespace>/test</namespace>
+      </ros>
+      <!-- Limits -->
+      <max_torque>5.0</max_torque>
+      <max_acceleration>0.5</max_acceleration>
+      <!-- Motor shaft name -->
+      <motor_shaft_name>motor_shaft_joint</motor_shaft_name>
+      <!-- Output -->
+      <publish_tf>false</publish_tf>
+      <!-- Update rate in Hz -->
+      <update_rate>5</update_rate>
+    </plugin>
   </model>
 </sdf>

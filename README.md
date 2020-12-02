@@ -168,5 +168,6 @@ well.
 
 Now to make the plugin interact with the model.
 
-
-
+The tutorial I was trying to follow is so out of date it should be removed
+from the internet!  I ended up using the diff_drive plugin as a model and
+had much more success.
