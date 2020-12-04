@@ -56,8 +56,8 @@ produce output similar to this:
 
 ```text
 [INFO] [1606819477.922987992] [gazebo_ros_node]: ROS was initialized without arguments.
-[INFO] [1606819477.954836133] [simple_motors]: Subscribed to [/cmd_motors]
-[INFO] [1606819477.955216037] [simple_motors]: Attached to Gazebo
+[INFO] [1606819477.954836133] [simple_motor]: Subscribed to [/cmd_motor]
+[INFO] [1606819477.955216037] [simple_motor]: Attached to Gazebo
 ```
 
 To test the plugin subscriber from the command line, open another terminal and
@@ -66,16 +66,16 @@ attach to the docker.  Then run one or more of these commands:
 ```bash
 $ ros2 topic list
 /clock
-/cmd_motors
+/cmd_motor
 /parameter_events
 /rosout
-$ ros2 topic info /cmd_motors
-Type: gazebo_ros_simple_motors_msgs/msg/MotorControl
+$ ros2 topic info /cmd_motor
+Type: gazebo_ros_simple_motor_msgs/msg/MotorControl
 Publisher count: 0
 Subscription count: 1
-$ ros2 topic pub --once /test/cmd_motors gazebo_ros_simple_motors_msgs/msg/MotorControl '{"motor": 1, "rpm": 100}'
+$ ros2 topic pub --once /test/cmd_motor gazebo_ros_simple_motor_msgs/msg/MotorControl '{"rpm": 100}'
 publisher: beginning loop
-publishing #1: gazebo_ros_simple_motors_msgs.msg.MotorControl(motor=1, rpm=10.0)
+publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(rpm=100.0)
 ```
 
 ## References
@@ -87,8 +87,8 @@ publishing #1: gazebo_ros_simple_motors_msgs.msg.MotorControl(motor=1, rpm=10.0)
 The X authority code that was previously used seems to not be needed any more
 and has been removed from the code.
 
-Only tested on Ubuntu 18.04LTS system.
+Only tested using docker for Ubuntu 20.04LTS ewith ROS2 Foxy on an
+Ubuntu 18.04LTS host.
 
 Batch files need to be written for Windows PCs.
 This looks useful <https://dev.to/darksmile92/run-gui-app-in-linux-docker-container-on-windows-host-4kde>
-

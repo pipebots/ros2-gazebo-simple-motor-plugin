@@ -15,8 +15,8 @@ fi
 # So instead set everything up manually.
 # The plugin
 MY_MODEL_PATH=~/code/models
-MY_PLUGIN_PATH=~/ws/install/gazebo_ros_simple_motors/lib:
-MY_PLUGIN_PATH+=~/ws/install/gazebo_ros_simple_motors_msgs/lib:
+MY_PLUGIN_PATH=~/ws/install/gazebo_ros_simple_motor/lib:
+MY_PLUGIN_PATH+=~/ws/install/gazebo_ros_simple_motor_msgs/lib:
 MY_RESOURCE_PATH=
 export GAZEBO_MASTER_URI=http://localhost:11345
 export GAZEBO_MODEL_DATABASE_URI=http://models.gazebosim.org

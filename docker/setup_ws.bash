@@ -8,8 +8,8 @@ mkdir -p src
 cd src
 
 # Link the plugin code into the workspace.
-ln -sf ~/code/gazebo_ros_simple_motors_msgs
-ln -sf ~/code/gazebo_ros_simple_motors
+ln -sf ~/code/gazebo_ros_simple_motor_msgs
+ln -sf ~/code/gazebo_ros_simple_motor
 
 # Do the first build.
 cd ${HOME}/ws

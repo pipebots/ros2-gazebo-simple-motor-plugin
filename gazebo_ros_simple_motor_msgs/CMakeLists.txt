@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(gazebo_ros_simple_motors_msgs)
+project(gazebo_ros_simple_motor_msgs)
 
 # Default to C99
 if(NOT CMAKE_C_STANDARD)

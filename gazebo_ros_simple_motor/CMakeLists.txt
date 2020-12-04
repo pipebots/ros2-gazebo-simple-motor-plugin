@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5)
-project(gazebo_ros_simple_motors)
+project(gazebo_ros_simple_motor)
 
 set(library_name
   ${PROJECT_NAME}
@@ -26,23 +26,11 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(gazebo_dev REQUIRED)
-# find_package(gazebo_msgs REQUIRED)
 find_package(gazebo_ros REQUIRED)
-find_package(gazebo_ros_simple_motors_msgs REQUIRED)
-# find_package(geometry_msgs REQUIRED)
-# find_package(image_transport REQUIRED)
-# find_package(cv_bridge REQUIRED)
-# find_package(nav_msgs REQUIRED)
+find_package(gazebo_ros_simple_motor_msgs REQUIRED)
 find_package(rclcpp REQUIRED)
-# find_package(sensor_msgs REQUIRED)
-# find_package(std_msgs REQUIRED)
-# find_package(std_srvs REQUIRED)
-# find_package(tf2 REQUIRED)
-# find_package(tf2_geometry_msgs REQUIRED)
-# find_package(tf2_ros REQUIRED)
-# find_package(trajectory_msgs REQUIRED)
 
-# gazebo_ros_simple_motors shared library.
+# gazebo_ros_simple_motor shared library.
 
 add_library(${library_name} SHARED
   src/${library_name}.cpp
@@ -58,13 +46,8 @@ target_include_directories(${library_name} PUBLIC
 ament_target_dependencies(${library_name}
   "gazebo_dev"
   "gazebo_ros"
-  "gazebo_ros_simple_motors_msgs"
-  # "geometry_msgs"
-  # "nav_msgs"
+  "gazebo_ros_simple_motor_msgs"
   "rclcpp"
-  # "tf2"
-  # "tf2_geometry_msgs"
-  # "tf2_ros"
 )
 
 ament_export_libraries(${library_name})

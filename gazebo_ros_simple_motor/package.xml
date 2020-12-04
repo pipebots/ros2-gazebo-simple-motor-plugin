@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
-  <name>gazebo_ros_simple_motors</name>
+  <name>gazebo_ros_simple_motor</name>
   <version>0.0.0</version>
   <description>Gazebo ROS2 Simple Motor Plugin</description>
   <maintainer email="a.j.blight@leeds.ac.uk">build</maintainer>
@@ -9,7 +9,7 @@
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 
-  <depend>gazebo_ros_simple_motors_msgs</depend>
+  <depend>gazebo_ros_simple_motor_msgs</depend>
 
   <build_depend>gazebo_dev</build_depend>
   <build_depend>gazebo_ros</build_depend>

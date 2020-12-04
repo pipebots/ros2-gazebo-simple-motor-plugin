@@ -17,18 +17,17 @@ This is known to work so could be used as a guide.  This is guide to the changes
 * This shows how to create a ROS plugin.  It would need to be updated for ROS2.
 <http://gazebosim.org/tutorials/?tut=ros_plugins#Tutorial:RosPlugins>
 
-The ROS motors plugin looks too complicated for the simple testing.
+The ROS motor plugin looks too complicated for the simple testing.
 
 Define new interface, something like this:
 
-Topic: /motors
+Topic: /cmd_motor
 
 ```text
-uint8 motor  # Index of motor, 0 is first motor.
-float64 rpm  # RPM of motor.  +ve is clockwise, -ve is anti-clockwise.
+# +ve rpm is counter-clockwise when looking at the motor from the drive shaft end.
+# This is one of those un-written standards.
+float64 rpm
 ```
-
-More parameters and options can be added later.
 
 I decided to pick apart the `gazebo_ros_diff_drive` plugin as it is widely
 used and I can see how everything fits together.  What I need to focus on is:
@@ -129,7 +128,7 @@ but the connections to Gazebo are a little more tricky.
 Gazebo to plugin: The plugin gains access to the `gazebo::physics::ModelPtr`
 in the `Load` function and uses the Gazebo model in `UpdateOdometryWorld`.
 
-Plugin to Gazebo: ?  TODO
+Plugin to Gazebo: This is done by calling SetVelocity().
 
 ## Developing the new plugin
 
@@ -178,7 +177,7 @@ rpm into a velocity value.  A velocity value of 5 = 49rpm.  A search on the
 internet shows that values I have measured show that velocity in radians per
 second.  The formula to convert is: 1 rad/s = 9.55 r/min (rpm).
 
-Abstracted out the SimpleMotor class from the GazeboRosSimpleMotorsPrivate
+Abstracted out the SimpleMotor class from the GazeboRosSimplePrivate
 class to allow me to change motor implementations at a future date.
 
 Connected ROS message to update function.  A few bugs found.  This is the
@@ -198,7 +197,7 @@ Annoying glitch when the motor is stationary.  Added a minimum speed of
 Next bug:
 
 ```text
-[INFO] [1607100484.053219039] [test.simple_motors]: Received: motor 1, rpm -1000.000000
+[INFO] [1607100484.053219039] [test.simple_motor]: Received: motor 1, rpm -1000.000000
 Update: 3 current -0.000861, target240.000000, next -2.000861
 Update: 3 current -1.777698, target240.000000, next -3.777698
 Update: 3 current -3.545638, target240.000000, next -5.545638
@@ -219,4 +218,6 @@ Update: 3 current -1460.489067, target-100.000000, next -1462.489067
 The speed of rotation caused the motor to bounce around the simulation.
 Very amusing but wrong!  Fixed.
 
-Tested the plugin and it all works.  Job done!
+Tested the plugin and it all works.  Tidied up debug/logging output.
+
+Job done!

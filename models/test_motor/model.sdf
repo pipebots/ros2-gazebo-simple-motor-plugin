@@ -115,7 +115,7 @@
     <static>0</static>
     <allow_auto_disable>1</allow_auto_disable>
     <!-- Attach the plugin to this model -->
-    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so">
+    <plugin name="simple_motor" filename="libgazebo_ros_simple_motor.so">
       <ros>
         <!-- Add a ROS namespace.  No code needed for this to work.  See
         https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_ros/include/gazebo_ros/node.hpp

@@ -23,12 +23,12 @@ SOFTWARE.
 #include <gtest/gtest.h>
 
 
-class TestGazeboROSMotorPlugin : public ::testing::Test
+class TestGazeboROSSimpleMotorPlugin : public ::testing::Test
 {
 };
 
 
-TEST(TestGazeboROSMotorPlugin, Pass)
+TEST(TestGazeboROSSimpleMotorPlugin, Pass)
 {
   int * test_ptr = nullptr;
   ASSERT_EQ(nullptr, test_ptr);

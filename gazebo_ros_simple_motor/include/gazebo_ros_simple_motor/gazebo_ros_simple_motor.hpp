@@ -20,8 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-#ifndef GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_
-#define GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_
+#ifndef GAZEBO_ROS_SIMPLE_MOTOR__GAZEBO_ROS_SIMPLE_MOTOR_HPP_
+#define GAZEBO_ROS_SIMPLE_MOTOR__GAZEBO_ROS_SIMPLE_MOTOR_HPP_
 
 #include <gazebo/common/Plugin.hh>
 
@@ -29,14 +29,14 @@ SOFTWARE.
 
 namespace gazebo
 {
-class GazeboRosSimpleMotorsPrivate;
+class GazeboRosSimpleMotorPrivate;
 
 /**
  * @brief A simple motor plugin.
  *
  * Example Usage:
   \code{.xml}
-    <plugin name="simple_motors" filename="libgazebo_ros_simple_motors.so">
+    <plugin name="simple_motor" filename="libgazebo_ros_simple_motor.so">
       <ros>
         <!-- Add a ROS namespace.  No code needed for this to work.  See
         https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_ros/include/gazebo_ros/node.hpp
@@ -56,14 +56,14 @@ class GazeboRosSimpleMotorsPrivate;
   \endcode
 */
 
-class GazeboRosSimpleMotors : public gazebo::ModelPlugin
+class GazeboRosSimpleMotor : public gazebo::ModelPlugin
 {
 public:
   /// Constructor
-  GazeboRosSimpleMotors();
+  GazeboRosSimpleMotor();
 
   /// Destructor
-  ~GazeboRosSimpleMotors();
+  ~GazeboRosSimpleMotor();
 
 protected:
   // Documentation inherited
@@ -74,9 +74,9 @@ protected:
 
 private:
   /// Private data pointer
-  std::unique_ptr<GazeboRosSimpleMotorsPrivate> impl_;
+  std::unique_ptr<GazeboRosSimpleMotorPrivate> impl_;
 };
 
 }  // namespace gazebo
 
-#endif  // GAZEBO_ROS_SIMPLE_MOTORS__GAZEBO_ROS_SIMPLE_MOTORS_HPP_
+#endif  // GAZEBO_ROS_SIMPLE_MOTOR__GAZEBO_ROS_SIMPLE_MOTOR_HPP_
