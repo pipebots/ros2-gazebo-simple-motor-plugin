@@ -217,5 +217,6 @@ Update: 3 current -1460.489067, target-100.000000, next -1462.489067
 ```
 
 The speed of rotation caused the motor to bounce around the simulation.
-Very amusing but wrong!  Also related to sign bit so fixed that.
+Very amusing but wrong!  Fixed.
 
+Tested the plugin and it all works.  Job done!
