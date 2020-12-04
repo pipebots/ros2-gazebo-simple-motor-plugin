@@ -64,12 +64,14 @@ To test the plugin subscriber from the command line, open another terminal and
 attach to the docker.  Then run one or more of these commands:
 
 ```bash
+cd ~/ws
+. ./install/local_setup.bash
 $ ros2 topic list
 /clock
-/cmd_motor
+/test/cmd_motor
 /parameter_events
 /rosout
-$ ros2 topic info /cmd_motor
+$ ros2 topic info /test/cmd_motor
 Type: gazebo_ros_simple_motor_msgs/msg/MotorControl
 Publisher count: 0
 Subscription count: 1

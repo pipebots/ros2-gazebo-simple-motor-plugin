@@ -221,3 +221,11 @@ Very amusing but wrong!  Fixed.
 Tested the plugin and it all works.  Tidied up debug/logging output.
 
 Job done!
+
+## Conclusion
+
+This project has given me good insight into how to develop a very basic Gazebo
+plugin.  Multiple instances of the motor can be used by using different
+namespace values in the `model.sdf` file.
+
+I hope you find it useful!
