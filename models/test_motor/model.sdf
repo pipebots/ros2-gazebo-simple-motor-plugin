@@ -124,15 +124,12 @@
         <namespace>/test</namespace>
       </ros>
       <!-- Limits -->
-      <max_torque>5.0</max_torque>
-      <max_acceleration>0.5</max_acceleration>
-      <max_rpm>10.0</max_rpm>
+      <max_change_rpm>2.0</max_change_rpm>
+      <max_rpm>240.0</max_rpm>
       <!-- Motor shaft name -->
       <motor_shaft_name>motor_shaft_joint</motor_shaft_name>
-      <!-- Output -->
-      <publish_tf>false</publish_tf>
       <!-- Update rate in Hz -->
-      <update_rate>10</update_rate>
+      <update_rate>10.0</update_rate>
     </plugin>
   </model>
 </sdf>

@@ -31,6 +31,7 @@ SOFTWARE.
 #include <rclcpp/rclcpp.hpp>
 #include <gazebo_ros_simple_motors_msgs/msg/motor_control.hpp>
 
+#include <cmath>
 #include <memory>
 #include <string>
 
@@ -38,16 +39,105 @@ SOFTWARE.
 namespace gazebo
 {
 
+/**
+ * @brief Handles the acceleration and deceleration of the motor to the
+ * requested speed.
+ */
+class SimpleMotor {
+  public:
+    SimpleMotor(physics::JointPtr joint, double max_acceleration, double max_rpm);
+    void Reset();
+    void SetSpeed(double new_rpm);
+    void Update();
+
+  private:
+    /// The revolutions per minute (rpm) value that was last set for the motor.
+    double current_rpm_;
+    /// The rpm value that was requested for this motor.
+    double target_rpm_;
+    /// The maximum change in rpm per call to the Update function.
+    double max_change_rpm_;
+    /// The maximum rpm for the motor.
+    double max_rpm_;
+    /// Pointer to the joint.
+    physics::JointPtr joint_;
+    /// The axis of rotation of the joint.
+    unsigned int axis_;
+};
+
+SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double max_rpm) :
+  current_rpm_(0.0),
+  target_rpm_(0.0),
+  max_change_rpm_(max_change_rpm),
+  max_rpm_(max_rpm),
+  joint_(joint),
+  axis_(0)
+{
+}
+
+void SimpleMotor::Reset()
+{
+  current_rpm_ = 0.0;
+  target_rpm_ = 0.0;
+}
+
+void SimpleMotor::SetSpeed(double new_rpm)
+{
+  // Clamp requested speed to maximum rpm in requested direction.
+  if (abs(new_rpm) > abs(max_rpm_)) {
+    bool clockwise = std::signbit(new_rpm);
+    if (clockwise) {
+      target_rpm_ = max_rpm_;
+    } else {
+      target_rpm_ = -max_rpm_;
+    }
+  } else {
+    target_rpm_ = new_rpm;
+  }
+}
+
+void SimpleMotor::Update()
+{
+  // Velocity is in radians per second, +ve is CCW, -ve is CW.
+  // Convert using 1 rad/s = 9.55 rpm.
+  double current_rad_s = joint_->GetVelocity(axis_);
+  double current_rpm = 9.55 * current_rad_s;
+  double next_rpm = current_rpm;
+  // See if the target rpm has been reached.
+  if (std::signbit(current_rpm) == std::signbit(target_rpm_) && \
+    abs(current_rpm - target_rpm_) < max_change_rpm_) {
+    // Reached target rpm.
+    next_rpm = target_rpm_;
+  } else {
+    // Change speed.
+    bool positive = std::signbit(target_rpm_);
+    bool speed_up = false;  // Slow down is default.
+    if (abs(current_rpm) < abs(target_rpm_)) {
+      // Speed up.
+      speed_up = true;
+    }
+    if ((speed_up && positive) || (!speed_up && !positive)) {
+      next_rpm += max_change_rpm_;
+    } else {
+      next_rpm -= max_change_rpm_;
+    }
+  }
+  printf("%s: current %f, next %f\n", __func__, current_rpm, next_rpm);
+  // Update the joint velocity.
+  double new_rad_s = next_rpm / 9.55;
+  joint_->SetVelocity(axis_, new_rad_s);
+}
+
+
+/**
+ * @brief Implementation class that deals with the interface between ROS and
+ * the SimpleMotor class.
+ */
 class GazeboRosSimpleMotorsPrivate
 {
   public:
     GazeboRosSimpleMotorsPrivate() :
-      max_acceleration_(0.0),
-      max_torque_(0.0),
-      publish_tf_(false),
-      update_period_s_(0.0),
-      shaft_target_rpm_(0.0),
-      shaft_max_rpm_(0.0)
+      update_period_s_(0.0)
     {
     }
     rclcpp::Logger GetLogger();
@@ -59,7 +149,6 @@ class GazeboRosSimpleMotorsPrivate
     void OnUpdate(const gazebo::common::UpdateInfo & _info);
     void OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg);
     bool SetupFromSDF(sdf::ElementPtr sdf);
-    void UpdateShaftRPM();
 
     /// Pointer to model.
     gazebo::physics::ModelPtr model_;
@@ -67,26 +156,10 @@ class GazeboRosSimpleMotorsPrivate
     gazebo_ros::Node::SharedPtr ros_node_;
     /// Subscriber to command velocities
     rclcpp::Subscription<gazebo_ros_simple_motors_msgs::msg::MotorControl>::SharedPtr cmd_motors_;
-    /// Pointer to the joint.
-    physics::JointPtr joint_;
-    /// A PID controller for the joint.
-    common::PID pid_;
-
-    /// Values read from SDF file.
-    /// Joint name.
-    std::string joint_name_;
-    /// Units???
-    double max_acceleration_;
-    /// Units???
-    double max_torque_;
-    /// When true, publish the transform values.
-    bool publish_tf_;
-    /// The update period in seconds.
+    /// The minimum interval between updates.
     double update_period_s_;
-    /// Shaft revolutions per min
-    double shaft_target_rpm_;
-    double shaft_max_rpm_;
-
+    // The motor instance.
+    std::unique_ptr<SimpleMotor> motor_;
     /// Connection to event called at every world iteration.
     gazebo::event::ConnectionPtr update_connection_;
     /// Last update time.
@@ -102,8 +175,7 @@ void GazeboRosSimpleMotorsPrivate::Reset()
 {
   last_update_time_ = model_->GetWorld()->SimTime();
   update_period_s_ = 0.0;
-  shaft_target_rpm_ = 0.0;
-  shaft_max_rpm_ = 0.0;
+  motor_->Reset();
 }
 
 bool GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
@@ -137,47 +209,33 @@ bool GazeboRosSimpleMotorsPrivate::SetupMotors(gazebo::physics::ModelPtr model, 
   if (success) {
     // Save model for later use.
     model_ = model;
-    // Set update time.
-    last_update_time_ = model_->GetWorld()->SimTime();
-    // Get a pointer to the joint.
-    joint_ = model_->GetJoint(joint_name_);
-    if (joint_) {
+
+    // Read SDF file values.
+    auto joint_name_ = sdf->Get<std::string>("motor_shaft_name", "").first;
+    auto max_change_rpm = sdf->Get<double>("max_change_rpm", 1.0).first;
+    auto max_rpm = sdf->Get<double>("max_rpm", 120.0).first;
+    auto update_rate_hz = sdf->Get<double>("update_rate", 10.0).first;
+    if (update_rate_hz > 0.0) {
+      update_period_s_ = 1.0 / update_rate_hz;
+    } else {
+      update_period_s_ = 0.0;
+    }
+    RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
+    RCLCPP_INFO(GetLogger(), "Using max change rpm %d", max_change_rpm);
+    RCLCPP_INFO(GetLogger(), "Using max rpm %d", max_rpm);
+    RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
+
+    // Create the motor instance.
+    auto joint = model_->GetJoint(joint_name_);
+    if (joint) {
+      motor_ = std::make_unique<SimpleMotor>(joint, max_change_rpm, max_rpm);
       success = true;
     } else {
       RCLCPP_ERROR(GetLogger(), "Could not get joint [%s]", joint_name_.c_str());
     }
+    // Set update time.
+    last_update_time_ = model_->GetWorld()->SimTime();
   }
-  return success;
-}
-
-bool GazeboRosSimpleMotorsPrivate::SetupFromSDF(sdf::ElementPtr sdf)
-{
-  bool success = false;
-  // FIXME  These read garbage values.
-  max_acceleration_ = sdf->Get<double>("max_acceleration", 1.0).first;
-  max_torque_ = sdf->Get<double>("max_torque", 1.0).first;
-  shaft_max_rpm_ = sdf->Get<double>("max_rpm", 100.0).first;
-  // These work.
-  joint_name_ = sdf->Get<std::string>("motor_shaft_name", "").first;
-  publish_tf_ = sdf->Get<bool>("publish_tf", false).first;
-  auto update_rate_hz = sdf->Get<double>("update_rate", 10.0).first;
-  if (update_rate_hz > 0.0) {
-    update_period_s_ = 1.0 / update_rate_hz;
-  } else {
-    update_period_s_ = 0.0;
-  }
-
-  RCLCPP_INFO(GetLogger(), "Using max acceleration %d", max_acceleration_);
-  RCLCPP_INFO(GetLogger(), "Using max torque %d", max_torque_);
-  RCLCPP_INFO(GetLogger(), "Using max RPM %d", shaft_max_rpm_);
-  RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
-  RCLCPP_INFO(GetLogger(), "Publish transforms %d", publish_tf_);
-  RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
-  // HACK
-  success = true;
-  shaft_max_rpm_ = 200.0;
-  shaft_target_rpm_ = 100.0;
-
   return success;
 }
 
@@ -185,7 +243,7 @@ void GazeboRosSimpleMotorsPrivate::OnUpdate(const gazebo::common::UpdateInfo & _
 {
   double since_last_update_s = (_info.simTime - last_update_time_).Double();
   if (since_last_update_s > update_period_s_) {
-    UpdateShaftRPM();
+    motor_->Update();
     last_update_time_ = _info.simTime;
   }
 }
@@ -194,34 +252,7 @@ void GazeboRosSimpleMotorsPrivate::OnCmdMotors(
   const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg)
 {
   RCLCPP_INFO(GetLogger(), "Received: motor %d, rpm %f", msg->motor, msg->rpm);
-  shaft_target_rpm_ = msg->rpm;
-}
-
-void GazeboRosSimpleMotorsPrivate::UpdateShaftRPM()
-{
-  // Velocity is in radians per second.
-  // Convert using 1 rad/s = 9.55 rpm.
-  const unsigned int axis = 0;
-  const double increment_rpm = 0.1;
-  double current_rad_s = joint_->GetVelocity(axis);
-  double current_rpm = 9.55 * current_rad_s;
-  double new_rpm = current_rpm;
-  if (new_rpm > shaft_max_rpm_) {
-    // Maximum spped.
-    new_rpm = shaft_max_rpm_;
-  } else if (new_rpm < (shaft_target_rpm_ - increment_rpm)) {
-    // Speed up.
-    new_rpm += increment_rpm;
-  } else if (new_rpm > (shaft_target_rpm_ + increment_rpm)) {
-    // Slow down.
-    new_rpm -= increment_rpm;
-  } else {
-    // Reached target speed.
-    new_rpm = shaft_target_rpm_;
-  }
-  RCLCPP_INFO(GetLogger(), "Current %f, new %f", current_rpm, new_rpm);
-  double new_rad_s = new_rpm / 9.55;
-  joint_->SetVelocity(axis, new_rad_s);
+  motor_->SetSpeed(msg->rpm);
 }
 
 /*****************************************************************************/
