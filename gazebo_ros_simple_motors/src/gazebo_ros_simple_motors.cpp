@@ -110,39 +110,23 @@ void SimpleMotor::Update()
   // This simulates friction in the motor bearings.
   if (abs(target_rpm_) < minimum_rpm) {
     next_rpm = 0.0;
-    printf("%s: 0 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+    // printf("%s: 0 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
   } else {
     // See if the target rpm has been reached.
     if (std::signbit(current_rpm) == std::signbit(target_rpm_) && \
       abs(current_rpm - target_rpm_) < max_change_rpm_) {
       // Reached target rpm.
       next_rpm = target_rpm_;
-      printf("%s: 1 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+      // printf("%s: 1 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
     } else {
       // Change speed.
-#if 1
       if (current_rpm < target_rpm_) {
         next_rpm += max_change_rpm_;
-        printf("%s: 2 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+        // printf("%s: 2 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
       } else {
         next_rpm -= max_change_rpm_;
-        printf("%s: 3 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+        // printf("%s: 3 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
       }
-#else
-      bool negative = std::signbit(target_rpm_);
-      bool speed_up = false;  // Slow down is default.
-      if (abs(current_rpm) < abs(target_rpm_)) {
-        // Speed up.
-        speed_up = true;
-      }
-      if ((speed_up && !negative) || (!speed_up && negative)) {
-        next_rpm += max_change_rpm_;
-        printf("%s: 2 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
-      } else {
-        next_rpm -= max_change_rpm_;
-        printf("%s: 3 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
-      }
-#endif
     }
   }
   // Update the joint velocity.
@@ -201,7 +185,6 @@ void GazeboRosSimpleMotorsPrivate::Reset()
 
 bool GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
 {
-  bool success = false;
   // Initialize ROS node.  This is done early so that the logger can be used.
   ros_node_ = gazebo_ros::Node::Get(sdf);
 
@@ -219,9 +202,7 @@ bool GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
   update_connection_ = gazebo::event::Events::ConnectWorldUpdateBegin(
     std::bind(&GazeboRosSimpleMotorsPrivate::OnUpdate, this, std::placeholders::_1));
 
-  success = true;
-
-  return success;
+  return true;
 }
 
 bool GazeboRosSimpleMotorsPrivate::SetupMotors(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
@@ -242,8 +223,8 @@ bool GazeboRosSimpleMotorsPrivate::SetupMotors(gazebo::physics::ModelPtr model, 
     update_period_s_ = 0.0;
   }
   RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
-  RCLCPP_INFO(GetLogger(), "Using max change rpm %d", max_change_rpm);
-  RCLCPP_INFO(GetLogger(), "Using max rpm %d", max_rpm);
+  RCLCPP_INFO(GetLogger(), "Using max change rpm %f", max_change_rpm);
+  RCLCPP_INFO(GetLogger(), "Using max rpm %f", max_rpm);
   RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
 
   // Create the motor instance.

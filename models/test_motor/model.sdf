@@ -123,10 +123,13 @@
         -->
         <namespace>/test</namespace>
       </ros>
-      <!-- Maximum change in rpm per update. -->
-      <max_change_rpm>2.0</max_change_rpm>
+      <!-- Maximum change in rpm per update.
+      Setting this to a large value, say 500.0, will cause instantaneous changes in speed.
+      Smaller values, say 5.0 or less, cause more gradual changes in speed "simulating" mass.
+      -->
+      <max_change_rpm>5.0</max_change_rpm>
       <!-- Maximum rpm. -->
-      <max_rpm>240.0</max_rpm>
+      <max_rpm>500.0</max_rpm>
       <!-- Motor shaft name -->
       <motor_shaft_name>motor_shaft_joint</motor_shaft_name>
       <!-- Update rate in Hz -->
