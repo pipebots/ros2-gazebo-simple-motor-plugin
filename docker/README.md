@@ -73,7 +73,7 @@ $ ros2 topic info /cmd_motors
 Type: gazebo_ros_simple_motors_msgs/msg/MotorControl
 Publisher count: 0
 Subscription count: 1
-$ ros2 topic pub --once /cmd_motors gazebo_ros_simple_motors_msgs/msg/MotorControl '{"motor": 1, "rpm": 10}'
+$ ros2 topic pub --once /test/cmd_motors gazebo_ros_simple_motors_msgs/msg/MotorControl '{"motor": 1, "rpm": 100}'
 publisher: beginning loop
 publishing #1: gazebo_ros_simple_motors_msgs.msg.MotorControl(motor=1, rpm=10.0)
 ```

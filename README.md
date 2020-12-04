@@ -177,3 +177,45 @@ motor shaft.  The interesting thing is trying to work out how to convert
 rpm into a velocity value.  A velocity value of 5 = 49rpm.  A search on the
 internet shows that values I have measured show that velocity in radians per
 second.  The formula to convert is: 1 rad/s = 9.55 r/min (rpm).
+
+Abstracted out the SimpleMotor class from the GazeboRosSimpleMotorsPrivate
+class to allow me to change motor implementations at a future date.
+
+Connected ROS message to update function.  A few bugs found.  This is the
+first:
+
+```text
+Update: 1 current 1.775516, target0.000000, next 0.000000
+Update: 1 current 0.199703, target0.000000, next 0.000000
+Update: 1 current 0.024860, target0.000000, next 0.000000
+Update: 2 current -0.002693, target0.000000, next 1.997307
+Update: 1 current 1.771486, target0.000000, next 0.000000
+```
+
+Annoying glitch when the motor is stationary.  Added a minimum speed of
+0.1 rpm to stop this happening.
+
+Next bug:
+
+```text
+[INFO] [1607100484.053219039] [test.simple_motors]: Received: motor 1, rpm -1000.000000
+Update: 3 current -0.000861, target240.000000, next -2.000861
+Update: 3 current -1.777698, target240.000000, next -3.777698
+Update: 3 current -3.545638, target240.000000, next -5.545638
+Update: 3 current -5.322279, target240.000000, next -7.322279
+```
+
+Target rpm should be -240 not +240.  Fixed in SetSpeed() once I realised that
+std::signbit() returns true when negative.
+
+Then there is this problem:
+
+```text
+Update: 3 current -1437.276801, target-100.000000, next -1439.276801
+Update: 3 current -1453.661664, target-100.000000, next -1455.661664
+Update: 3 current -1460.489067, target-100.000000, next -1462.489067
+```
+
+The speed of rotation caused the motor to bounce around the simulation.
+Very amusing but wrong!  Also related to sign bit so fixed that.
+

@@ -3,8 +3,8 @@
   <model name='test_motor'>
     <pose>0.0 0.0 0.2 0 -0 0</pose>
     <link name='motor_body'>
-      <!-- <inertial>
-        <mass>1</mass>
+      <inertial>
+        <mass>10</mass>
         <inertia>
           <ixx>0.166667</ixx>
           <ixy>0</ixy>
@@ -13,8 +13,8 @@
           <iyz>0</iyz>
           <izz>0.166667</izz>
         </inertia>
-        <pose>0 0 0 0 -0 0</pose>
-      </inertial> -->
+        <!-- <pose>0 0 0 0 -0 0</pose> -->
+      </inertial>
       <collision name='collision'>
         <geometry>
           <box>
@@ -63,7 +63,7 @@
     </link>
     <link name='bar'>
       <pose>0.05 0 0.35 0 -0 0</pose> -->
-      <!-- <inertial>
+      <inertial>
         <mass>1</mass>
         <inertia>
           <ixx>0.145833</ixx>
@@ -73,8 +73,8 @@
           <iyz>0</iyz>
           <izz>0.125</izz>
         </inertia>
-        <pose>0.0 0.0 1.2 0 -0 0</pose>
-      </inertial> -->
+        <!-- <pose>0.0 0.0 1.2 0 -0 0</pose> -->
+      </inertial>
       <collision name='collision'>
         <geometry>
           <box>
@@ -123,8 +123,9 @@
         -->
         <namespace>/test</namespace>
       </ros>
-      <!-- Limits -->
+      <!-- Maximum change in rpm per update. -->
       <max_change_rpm>2.0</max_change_rpm>
+      <!-- Maximum rpm. -->
       <max_rpm>240.0</max_rpm>
       <!-- Motor shaft name -->
       <motor_shaft_name>motor_shaft_joint</motor_shaft_name>

@@ -87,9 +87,10 @@ void SimpleMotor::SetSpeed(double new_rpm)
   if (abs(new_rpm) > abs(max_rpm_)) {
     bool clockwise = std::signbit(new_rpm);
     if (clockwise) {
-      target_rpm_ = max_rpm_;
-    } else {
+      // Clockwise is negative.
       target_rpm_ = -max_rpm_;
+    } else {
+      target_rpm_ = max_rpm_;
     }
   } else {
     target_rpm_ = new_rpm;
@@ -100,29 +101,50 @@ void SimpleMotor::Update()
 {
   // Velocity is in radians per second, +ve is CCW, -ve is CW.
   // Convert using 1 rad/s = 9.55 rpm.
+  const double minimum_rpm = 0.1;
   double current_rad_s = joint_->GetVelocity(axis_);
   double current_rpm = 9.55 * current_rad_s;
+  // Default action is keep speed constant.
   double next_rpm = current_rpm;
-  // See if the target rpm has been reached.
-  if (std::signbit(current_rpm) == std::signbit(target_rpm_) && \
-    abs(current_rpm - target_rpm_) < max_change_rpm_) {
-    // Reached target rpm.
-    next_rpm = target_rpm_;
+  // Any rpm value less than the minimum speed is treated a 0.
+  // This simulates friction in the motor bearings.
+  if (abs(target_rpm_) < minimum_rpm) {
+    next_rpm = 0.0;
+    printf("%s: 0 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
   } else {
-    // Change speed.
-    bool positive = std::signbit(target_rpm_);
-    bool speed_up = false;  // Slow down is default.
-    if (abs(current_rpm) < abs(target_rpm_)) {
-      // Speed up.
-      speed_up = true;
-    }
-    if ((speed_up && positive) || (!speed_up && !positive)) {
-      next_rpm += max_change_rpm_;
+    // See if the target rpm has been reached.
+    if (std::signbit(current_rpm) == std::signbit(target_rpm_) && \
+      abs(current_rpm - target_rpm_) < max_change_rpm_) {
+      // Reached target rpm.
+      next_rpm = target_rpm_;
+      printf("%s: 1 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
     } else {
-      next_rpm -= max_change_rpm_;
+      // Change speed.
+#if 1
+      if (current_rpm < target_rpm_) {
+        next_rpm += max_change_rpm_;
+        printf("%s: 2 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+      } else {
+        next_rpm -= max_change_rpm_;
+        printf("%s: 3 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+      }
+#else
+      bool negative = std::signbit(target_rpm_);
+      bool speed_up = false;  // Slow down is default.
+      if (abs(current_rpm) < abs(target_rpm_)) {
+        // Speed up.
+        speed_up = true;
+      }
+      if ((speed_up && !negative) || (!speed_up && negative)) {
+        next_rpm += max_change_rpm_;
+        printf("%s: 2 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+      } else {
+        next_rpm -= max_change_rpm_;
+        printf("%s: 3 current %f, target %f, next %f\n", __func__, current_rpm, target_rpm_, next_rpm);
+      }
+#endif
     }
   }
-  printf("%s: current %f, next %f\n", __func__, current_rpm, next_rpm);
   // Update the joint velocity.
   double new_rad_s = next_rpm / 9.55;
   joint_->SetVelocity(axis_, new_rad_s);
@@ -148,7 +170,6 @@ class GazeboRosSimpleMotorsPrivate
   private:
     void OnUpdate(const gazebo::common::UpdateInfo & _info);
     void OnCmdMotors(const gazebo_ros_simple_motors_msgs::msg::MotorControl::SharedPtr msg);
-    bool SetupFromSDF(sdf::ElementPtr sdf);
 
     /// Pointer to model.
     gazebo::physics::ModelPtr model_;
@@ -205,37 +226,36 @@ bool GazeboRosSimpleMotorsPrivate::SetupROSNode(sdf::ElementPtr sdf)
 
 bool GazeboRosSimpleMotorsPrivate::SetupMotors(gazebo::physics::ModelPtr model, sdf::ElementPtr sdf)
 {
-  bool success = SetupFromSDF(sdf);
-  if (success) {
-    // Save model for later use.
-    model_ = model;
+  bool success = false;
 
-    // Read SDF file values.
-    auto joint_name_ = sdf->Get<std::string>("motor_shaft_name", "").first;
-    auto max_change_rpm = sdf->Get<double>("max_change_rpm", 1.0).first;
-    auto max_rpm = sdf->Get<double>("max_rpm", 120.0).first;
-    auto update_rate_hz = sdf->Get<double>("update_rate", 10.0).first;
-    if (update_rate_hz > 0.0) {
-      update_period_s_ = 1.0 / update_rate_hz;
-    } else {
-      update_period_s_ = 0.0;
-    }
-    RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
-    RCLCPP_INFO(GetLogger(), "Using max change rpm %d", max_change_rpm);
-    RCLCPP_INFO(GetLogger(), "Using max rpm %d", max_rpm);
-    RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
+  // Save model for later use.
+  model_ = model;
 
-    // Create the motor instance.
-    auto joint = model_->GetJoint(joint_name_);
-    if (joint) {
-      motor_ = std::make_unique<SimpleMotor>(joint, max_change_rpm, max_rpm);
-      success = true;
-    } else {
-      RCLCPP_ERROR(GetLogger(), "Could not get joint [%s]", joint_name_.c_str());
-    }
-    // Set update time.
-    last_update_time_ = model_->GetWorld()->SimTime();
+  // Read SDF file values.
+  auto joint_name_ = sdf->Get<std::string>("motor_shaft_name", "").first;
+  auto max_change_rpm = sdf->Get<double>("max_change_rpm", 1.0).first;
+  auto max_rpm = sdf->Get<double>("max_rpm", 120.0).first;
+  auto update_rate_hz = sdf->Get<double>("update_rate", 10.0).first;
+  if (update_rate_hz > 0.0) {
+    update_period_s_ = 1.0 / update_rate_hz;
+  } else {
+    update_period_s_ = 0.0;
   }
+  RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
+  RCLCPP_INFO(GetLogger(), "Using max change rpm %d", max_change_rpm);
+  RCLCPP_INFO(GetLogger(), "Using max rpm %d", max_rpm);
+  RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
+
+  // Create the motor instance.
+  auto joint = model_->GetJoint(joint_name_);
+  if (joint) {
+    motor_ = std::make_unique<SimpleMotor>(joint, max_change_rpm, max_rpm);
+    success = true;
+  } else {
+    RCLCPP_ERROR(GetLogger(), "Could not get joint [%s]", joint_name_.c_str());
+  }
+  // Set update time.
+  last_update_time_ = model_->GetWorld()->SimTime();
   return success;
 }
 
