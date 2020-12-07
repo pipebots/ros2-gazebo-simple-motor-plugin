@@ -39,6 +39,12 @@ SOFTWARE.
 namespace gazebo
 {
 
+typedef enum {
+  MODE_ABSOLUTE,
+  MODE_RELATIVE,
+  MODE_SPEED
+} mode_t;
+
 /**
  * @brief Handles the acceleration and deceleration of the motor to the
  * requested speed.
@@ -48,10 +54,30 @@ class SimpleMotor
 public:
   SimpleMotor(physics::JointPtr joint, double max_acceleration, double max_rpm);
   void Reset();
+
+  /**
+   * @brief Get the angle of joint.
+   *
+   * @return double Degrees from starting position.
+   */
+  double GetPosition();
+
+  void MoveRelative(double delta_degrees);
+
+  void SetAbsolute(double new_position_degrees);
+
   void SetSpeed(double new_rpm);
+  /**
+   * @brief Set the angle of the joint
+   *
+   * @param new_position_degrees
+   */
   void Update();
 
 private:
+  void UpdatePosition();
+  void UpdateSpeed();
+
   /// The revolutions per minute (rpm) value that was last set for the motor.
   double current_rpm_;
   /// The rpm value that was requested for this motor.
@@ -64,6 +90,12 @@ private:
   physics::JointPtr joint_;
   /// The axis of rotation of the joint.
   unsigned int axis_;
+  /// Mode
+  mode_t mode_;
+  /// The start position.
+  double start_position_degrees_;
+  /// Absolute position of the motor relative to the start position.
+  double absolute_position_degrees_;
 };
 
 SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double max_rpm)
@@ -72,18 +104,44 @@ SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double 
   max_change_rpm_(max_change_rpm),
   max_rpm_(max_rpm),
   joint_(joint),
-  axis_(0)
+  axis_(0),
+  mode_(MODE_ABSOLUTE),
+  start_position_degrees_(0.0),
+  absolute_position_degrees_(0.0)
 {
+  auto start_position_radians = joint_->Position(axis_);
+  start_position_degrees_ = start_position_radians * (180/ M_PI);
+  printf( "%s: start position %f radians, %f degrees\n",
+    __func__, start_position_radians, start_position_degrees_);
 }
 
 void SimpleMotor::Reset()
 {
   current_rpm_ = 0.0;
   target_rpm_ = 0.0;
+  mode_ = MODE_ABSOLUTE;
+}
+
+double SimpleMotor::GetPosition()
+{
+  return absolute_position_degrees_;
+}
+
+void SimpleMotor::MoveRelative(double delta_degrees)
+{
+  mode_ = MODE_RELATIVE;
+  printf("%s: delta %f degrees\n", __func__, delta_degrees);
+}
+
+void SimpleMotor::SetAbsolute(double new_position_degrees)
+{
+  mode_ = MODE_ABSOLUTE;
+  printf("%s: new position %f degrees\n", __func__, new_position_degrees);
 }
 
 void SimpleMotor::SetSpeed(double new_rpm)
 {
+  mode_ = MODE_SPEED;
   // Clamp requested speed to maximum rpm in requested direction.
   if (abs(new_rpm) > abs(max_rpm_)) {
     bool clockwise = std::signbit(new_rpm);
@@ -98,7 +156,22 @@ void SimpleMotor::SetSpeed(double new_rpm)
   }
 }
 
+
 void SimpleMotor::Update()
+{
+  if (mode_ == MODE_SPEED) {
+    UpdateSpeed();
+  } else {
+    UpdatePosition();
+  }
+}
+
+void SimpleMotor::UpdatePosition()
+{
+  printf("%s: todo\n", __func__);
+}
+
+void SimpleMotor::UpdateSpeed()
 {
   // Velocity is in radians per second, +ve is CCW, -ve is CW.
   // Convert using 1 rad/s = 9.55 rpm.
@@ -262,8 +335,14 @@ void GazeboRosSimpleMotorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _i
 void GazeboRosSimpleMotorPrivate::OnCmdMotor(
   const gazebo_ros_simple_motor_msgs::msg::MotorControl::SharedPtr msg)
 {
-  RCLCPP_INFO(GetLogger(), "Received: rpm %f", msg->rpm);
-  motor_->SetSpeed(msg->rpm);
+  RCLCPP_INFO(GetLogger(), "Received: mode %d, rpm %f, angle %f", msg->mode, msg->rpm, msg->angle);
+  if (msg->mode == MODE_SPEED) {
+    motor_->SetSpeed(msg->rpm);
+  } else if (msg->mode == MODE_ABSOLUTE) {
+    motor_->SetAbsolute(msg->angle);
+  } else if (msg->mode == MODE_RELATIVE) {
+    motor_->MoveRelative(msg->angle);
+  }
 }
 
 /*****************************************************************************/
