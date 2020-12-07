@@ -133,10 +133,10 @@
       <!-- Maximum rpm. -->
       <max_rpm>500.0</max_rpm>
       <!-- Maximum position change per update.
-      Similar to rpm, the maximum number of degrees that will be moved per update.
-      For 360 degrees at 10Hz, 4 degrees with take just under a second.
+      Similar to rpm, the maximum number of radians that will be moved per update.
+      For a full circle at 10Hz, 0.628r per update will take 2 seconds.
       -->
-      <max_change_degrees>4.0</max_change_degrees>
+      <max_change_radians>0.628</max_change_radians>
       <!-- Update rate in Hz -->
       <update_rate>10.0</update_rate>
     </plugin>

@@ -52,26 +52,16 @@ typedef enum {
 class SimpleMotor
 {
 public:
-  SimpleMotor(physics::JointPtr joint, double max_acceleration, double max_rpm);
+  SimpleMotor(physics::JointPtr joint, double max_acceleration, double max_rpm, double max_change_radians);
+
   void Reset();
 
-  /**
-   * @brief Get the angle of joint.
-   *
-   * @return double Degrees from starting position.
-   */
-  double GetPosition();
+  void MoveRelative(double delta_radians);
 
-  void MoveRelative(double delta_degrees);
-
-  void SetAbsolute(double new_position_degrees);
+  void MoveAbsolute(double new_position_radians);
 
   void SetSpeed(double new_rpm);
-  /**
-   * @brief Set the angle of the joint
-   *
-   * @param new_position_degrees
-   */
+
   void Update();
 
 private:
@@ -86,57 +76,73 @@ private:
   double max_change_rpm_;
   /// The maximum rpm for the motor.
   double max_rpm_;
+  /// The maximum change in radians per call to the Update function.
+  double max_change_radians_;
   /// Pointer to the joint.
   physics::JointPtr joint_;
   /// The axis of rotation of the joint.
   unsigned int axis_;
   /// Mode
   mode_t mode_;
-  /// The start position.
-  double start_position_degrees_;
-  /// Absolute position of the motor relative to the start position.
-  double absolute_position_degrees_;
+  /// Angle to move through in radians.
+  double delta_radians_;
+  /// Target angle.
+  double target_angle_radians_;
 };
 
-SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double max_rpm)
+SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double max_rpm, double max_change_radians)
 : current_rpm_(0.0),
   target_rpm_(0.0),
   max_change_rpm_(max_change_rpm),
   max_rpm_(max_rpm),
+  max_change_radians_(max_change_radians),
   joint_(joint),
   axis_(0),
   mode_(MODE_ABSOLUTE),
-  start_position_degrees_(0.0),
-  absolute_position_degrees_(0.0)
+  delta_radians_(0.0),
+  target_angle_radians_(0.0)
 {
-  auto start_position_radians = joint_->Position(axis_);
-  start_position_degrees_ = start_position_radians * (180/ M_PI);
-  printf( "%s: start position %f radians, %f degrees\n",
-    __func__, start_position_radians, start_position_degrees_);
 }
 
 void SimpleMotor::Reset()
 {
   current_rpm_ = 0.0;
   target_rpm_ = 0.0;
+  delta_radians_ = 0.0;
+  target_angle_radians_ = 0.0;
   mode_ = MODE_ABSOLUTE;
 }
 
-double SimpleMotor::GetPosition()
-{
-  return absolute_position_degrees_;
-}
-
-void SimpleMotor::MoveRelative(double delta_degrees)
+void SimpleMotor::MoveRelative(double delta_radians)
 {
   mode_ = MODE_RELATIVE;
-  printf("%s: delta %f degrees\n", __func__, delta_degrees);
+  printf("%s: delta %f radians\n", __func__, delta_radians);
+  delta_radians_ = delta_radians;
+  double position_radians = joint_->Position(axis_);
+  target_angle_radians_ = position_radians + delta_radians_;
+  printf(
+    "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
+    __func__, position_radians, target_angle_radians_, delta_radians_);
 }
 
-void SimpleMotor::SetAbsolute(double new_position_degrees)
+void SimpleMotor::MoveAbsolute(double new_position_radians)
 {
+  // The tricky thing about this is that the new position should be in the
+  // range -PI radians to +PI radians.
   mode_ = MODE_ABSOLUTE;
-  printf("%s: new position %f degrees\n", __func__, new_position_degrees);
+  printf("%s: new position %f radians\n", __func__, new_position_radians);
+  // Calculate the target angle.
+  target_angle_radians_ = fmod(abs(new_position_radians), M_PI);
+
+  // Calculate the current position in range -PI to +PI.
+  double position_radians = joint_->Position(axis_);
+  double position_radians_modulo = fmod(position_radians, M_PI);
+
+  // The delta is the difference between the two values.
+  delta_radians_ = new_position_radians - position_radians_modulo;
+  printf(
+    "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
+    __func__, position_radians, target_angle_radians_, delta_radians_);
 }
 
 void SimpleMotor::SetSpeed(double new_rpm)
@@ -156,7 +162,6 @@ void SimpleMotor::SetSpeed(double new_rpm)
   }
 }
 
-
 void SimpleMotor::Update()
 {
   if (mode_ == MODE_SPEED) {
@@ -168,7 +173,29 @@ void SimpleMotor::Update()
 
 void SimpleMotor::UpdatePosition()
 {
-  printf("%s: todo\n", __func__);
+  double next_position_radians = 0.0;
+  double position_radians = joint_->Position(axis_);
+  double absolute_difference_radians = abs(target_angle_radians_ - position_radians);
+  if (absolute_difference_radians < max_change_radians_) {
+    // Close enough.
+    next_position_radians = target_angle_radians_;
+    delta_radians_ = 0.0;
+  } else {
+    // Need to move a step closer.
+    if (std::signbit(delta_radians_)) {
+      // Negative
+      next_position_radians = position_radians - max_change_radians_;
+      delta_radians_ += max_change_radians_;
+    } else {
+      // Positive
+      next_position_radians = position_radians + max_change_radians_;
+      delta_radians_ -= max_change_radians_;
+    }
+  }
+  printf(
+    "%s: next_position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
+    __func__, next_position_radians, target_angle_radians_, delta_radians_);
+  joint_->SetPosition(axis_, next_position_radians);
 }
 
 void SimpleMotor::UpdateSpeed()
@@ -212,6 +239,12 @@ void SimpleMotor::UpdateSpeed()
       }
     }
   }
+  // HACK
+  double position_radians = joint_->Position(axis_);
+  printf(
+    "%s: position_radians %f\n",
+    __func__, position_radians);
+
   // Update the joint velocity.
   double new_rad_s = next_rpm / 9.55;
   joint_->SetVelocity(axis_, new_rad_s);
@@ -297,9 +330,10 @@ bool GazeboRosSimpleMotorPrivate::SetupMotor(gazebo::physics::ModelPtr model, sd
 
   // Read SDF file values.
   auto joint_name_ = sdf->Get<std::string>("motor_shaft_name", "").first;
-  auto max_change_rpm = sdf->Get<double>("max_change_rpm", 1.0).first;
-  auto max_rpm = sdf->Get<double>("max_rpm", 120.0).first;
-  auto update_rate_hz = sdf->Get<double>("update_rate", 10.0).first;
+  auto max_change_rpm = abs(sdf->Get<double>("max_change_rpm", 1.0).first);
+  auto max_rpm = abs(sdf->Get<double>("max_rpm", 120.0).first);
+  auto max_change_radians = abs(sdf->Get<double>("max_change_radians", 18.0).first);
+  auto update_rate_hz = abs(sdf->Get<double>("update_rate", 10.0).first);
   if (update_rate_hz > 0.0) {
     update_period_s_ = 1.0 / update_rate_hz;
   } else {
@@ -308,12 +342,13 @@ bool GazeboRosSimpleMotorPrivate::SetupMotor(gazebo::physics::ModelPtr model, sd
   RCLCPP_INFO(GetLogger(), "Using joint [%s]", joint_name_.c_str());
   RCLCPP_INFO(GetLogger(), "Using max change rpm %f", max_change_rpm);
   RCLCPP_INFO(GetLogger(), "Using max rpm %f", max_rpm);
+  RCLCPP_INFO(GetLogger(), "Using max change radians %f", max_change_radians);
   RCLCPP_INFO(GetLogger(), "Using update period %f", update_period_s_);
 
   // Create the motor instance.
   auto joint = model_->GetJoint(joint_name_);
   if (joint) {
-    motor_ = std::make_unique<SimpleMotor>(joint, max_change_rpm, max_rpm);
+    motor_ = std::make_unique<SimpleMotor>(joint, max_change_rpm, max_rpm, max_change_radians);
     success = true;
   } else {
     RCLCPP_ERROR(GetLogger(), "Could not get joint [%s]", joint_name_.c_str());
@@ -335,13 +370,15 @@ void GazeboRosSimpleMotorPrivate::OnUpdate(const gazebo::common::UpdateInfo & _i
 void GazeboRosSimpleMotorPrivate::OnCmdMotor(
   const gazebo_ros_simple_motor_msgs::msg::MotorControl::SharedPtr msg)
 {
-  RCLCPP_INFO(GetLogger(), "Received: mode %d, rpm %f, angle %f", msg->mode, msg->rpm, msg->angle);
+  RCLCPP_INFO(
+    GetLogger(), "Received: mode %d, rpm %f, angle_radians %f",
+    msg->mode, msg->rpm, msg->angle_radians);
   if (msg->mode == MODE_SPEED) {
     motor_->SetSpeed(msg->rpm);
   } else if (msg->mode == MODE_ABSOLUTE) {
-    motor_->SetAbsolute(msg->angle);
+    motor_->MoveAbsolute(msg->angle_radians);
   } else if (msg->mode == MODE_RELATIVE) {
-    motor_->MoveRelative(msg->angle);
+    motor_->MoveRelative(msg->angle_radians);
   }
 }
 

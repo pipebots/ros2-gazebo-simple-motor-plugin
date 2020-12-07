@@ -220,7 +220,24 @@ Very amusing but wrong!  Fixed.
 
 Tested the plugin and it all works.  Tidied up debug/logging output.
 
-Job done!
+### Adding angle control
+
+After getting the basics working, I decided that it would be useful to do some
+sort of slow motion control.  The use case is where the motor is being used to
+directly control a non-trivial mechanism such as a cam that drives a model
+over the ground.
+
+After some thought, I settled on adding an option to set the position of the
+motor directly and to also move the motor through a specified number of
+degrees.  After a conversation with Andy Barber, I decided to use radians
+instead of degrees.
+
+I modified the message first, fairly easy but I needed to add a `mode` value
+to tell the plugin how to use the `angle_radians` and `rpm` variables.  I then
+added code to handle the extra messages that called two new functions in
+`SimpleMotor` and then started implementation of the extra logic.
+
+
 
 ## Conclusion
 

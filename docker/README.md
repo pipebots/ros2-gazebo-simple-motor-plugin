@@ -75,10 +75,9 @@ $ ros2 topic info /test/cmd_motor
 Type: gazebo_ros_simple_motor_msgs/msg/MotorControl
 Publisher count: 0
 Subscription count: 1
-$ ros2 topic pub --once /test/cmd_motor gazebo_ros_simple_motor_msgs/msg/MotorControl '{"rpm": 100}'
+$ ros2 topic pub --once /test/cmd_motor gazebo_ros_simple_motor_msgs/msg/MotorControl '{"mode": 2, "rpm": 100}'
 publisher: beginning loop
-publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(rpm=100.0)
-```
+publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(mode=2, angle_radians=0.0, rpm=100.0)```
 
 ## References
 
@@ -89,7 +88,7 @@ publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(rpm=100.0)
 The X authority code that was previously used seems to not be needed any more
 and has been removed from the code.
 
-Only tested using docker for Ubuntu 20.04LTS ewith ROS2 Foxy on an
+Only tested using docker for Ubuntu 20.04LTS with ROS2 Foxy on an
 Ubuntu 18.04LTS host.
 
 Batch files need to be written for Windows PCs.
