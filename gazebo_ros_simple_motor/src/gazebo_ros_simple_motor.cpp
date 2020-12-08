@@ -39,7 +39,8 @@ SOFTWARE.
 namespace gazebo
 {
 
-typedef enum {
+typedef enum
+{
   MODE_ABSOLUTE,
   MODE_RELATIVE,
   MODE_SPEED
@@ -52,7 +53,9 @@ typedef enum {
 class SimpleMotor
 {
 public:
-  SimpleMotor(physics::JointPtr joint, double max_acceleration, double max_rpm, double max_change_radians);
+  SimpleMotor(
+    physics::JointPtr joint, double max_acceleration, double max_rpm,
+    double max_change_radians);
 
   void Reset();
 
@@ -90,7 +93,9 @@ private:
   double target_angle_radians_;
 };
 
-SimpleMotor::SimpleMotor(physics::JointPtr joint, double max_change_rpm, double max_rpm, double max_change_radians)
+SimpleMotor::SimpleMotor(
+  physics::JointPtr joint, double max_change_rpm, double max_rpm,
+  double max_change_radians)
 : current_rpm_(0.0),
   target_rpm_(0.0),
   max_change_rpm_(max_change_rpm),
