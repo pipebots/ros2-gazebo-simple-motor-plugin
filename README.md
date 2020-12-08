@@ -263,8 +263,13 @@ UpdatePosition: next_position_radians 243.969505, target_angle_radians_ 2.000000
 UpdatePosition: next_position_radians 243.341503, target_angle_radians_ 2.000000, delta_radians_ 0.561128
 ```
 
-The problem was that the target angle was
+The problem was that the target angle was way smaller than the actual position.
+A quick modification solved that problem and both modes work correctly.
 
+### Test/example program
+
+The motor now needs a test program to verify the operation of the motor and to
+demonstrate how it should be used.
 
 ## Conclusion
 

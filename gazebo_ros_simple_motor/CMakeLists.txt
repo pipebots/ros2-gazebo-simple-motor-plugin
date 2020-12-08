@@ -75,17 +75,17 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 
   # Inspired by https://github.com/ros-simulation/gazebo_ros_pkgs/blob/foxy/gazebo_plugins/test/CMakeLists.txt
-  find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(${test_name}
     test/${test_name}.cpp
-    WORKING_DIRECTORY
-      ${CMAKE_CURRENT_BINARY_DIR}
-    TIMEOUT
-      120
   )
-  target_link_libraries(${test_name}
-    gazebo_test_fixture
+  target_include_directories(${test_name} PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    $<INSTALL_INTERFACE:include>
   )
+  ament_target_dependencies(${test_name}
+  "gazebo_ros_simple_motor_msgs"
+  "rclcpp"
+)
 endif()
 
 ament_package()
