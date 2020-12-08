@@ -136,7 +136,7 @@
       Similar to rpm, the maximum number of radians that will be moved per update.
       For a full circle at 10Hz, 0.628r per update will take 2 seconds.
       -->
-      <max_change_radians>0.628</max_change_radians>
+      <max_change_radians>0.314</max_change_radians>
       <!-- Update rate in Hz -->
       <update_rate>10.0</update_rate>
     </plugin>

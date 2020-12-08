@@ -131,8 +131,8 @@ void SimpleMotor::MoveAbsolute(double new_position_radians)
   // range -PI radians to +PI radians.
   mode_ = MODE_ABSOLUTE;
   printf("%s: new position %f radians\n", __func__, new_position_radians);
-  // Calculate the target angle.
-  target_angle_radians_ = fmod(abs(new_position_radians), M_PI);
+  // Set the target angle.
+  target_angle_radians_ = new_position_radians;
 
   // Calculate the current position in range -PI to +PI.
   double position_radians = joint_->Position(axis_);
@@ -175,6 +175,9 @@ void SimpleMotor::UpdatePosition()
 {
   double next_position_radians = 0.0;
   double position_radians = joint_->Position(axis_);
+  if (mode_ == MODE_ABSOLUTE) {
+    position_radians = fmod(position_radians, M_PI);
+  }
   double absolute_difference_radians = abs(target_angle_radians_ - position_radians);
   if (absolute_difference_radians < max_change_radians_) {
     // Close enough.

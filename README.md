@@ -237,6 +237,33 @@ to tell the plugin how to use the `angle_radians` and `rpm` variables.  I then
 added code to handle the extra messages that called two new functions in
 `SimpleMotor` and then started implementation of the extra logic.
 
+Relative mode works fine.
+
+```text
+[INFO] [1607457245.476815756] [test.simple_motor]: Received: mode 1, rpm 0.000000, angle_radians 2.000000
+MoveRelative: delta 2.000000 radians
+MoveRelative: position_radians 243.340101, target_angle_radians_ 245.340101, delta_radians_ 2.000000
+UpdatePosition: next_position_radians 243.968102, target_angle_radians_ 245.340101, delta_radians_ 1.372000
+UpdatePosition: next_position_radians 244.596100, target_angle_radians_ 245.340101, delta_radians_ 0.744000
+UpdatePosition: next_position_radians 245.224101, target_angle_radians_ 245.340101, delta_radians_ 0.116000
+UpdatePosition: next_position_radians 245.340101, target_angle_radians_ 245.340101, delta_radians_ 0.000000
+```
+
+The motor oscillates when absolute mode is used.
+
+```text
+[INFO] [1607456837.122404382] [test.simple_motor]: Received: mode 0, rpm 0.000000, angle_radians 2.000000
+MoveAbsolute: new position 2.000000 radians
+MoveAbsolute: position_radians 243.341506, target_angle_radians_ 2.000000, delta_radians_ 0.561128
+UpdatePosition: next_position_radians 243.969506, target_angle_radians_ 2.000000, delta_radians_ -0.066872
+UpdatePosition: next_position_radians 243.341504, target_angle_radians_ 2.000000, delta_radians_ 0.561128
+UpdatePosition: next_position_radians 243.969505, target_angle_radians_ 2.000000, delta_radians_ -0.066872
+UpdatePosition: next_position_radians 243.341506, target_angle_radians_ 2.000000, delta_radians_ 0.561128
+UpdatePosition: next_position_radians 243.969505, target_angle_radians_ 2.000000, delta_radians_ -0.066872
+UpdatePosition: next_position_radians 243.341503, target_angle_radians_ 2.000000, delta_radians_ 0.561128
+```
+
+The problem was that the target angle was
 
 
 ## Conclusion
