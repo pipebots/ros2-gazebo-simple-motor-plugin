@@ -121,13 +121,13 @@ void SimpleMotor::Reset()
 void SimpleMotor::MoveRelative(double delta_radians)
 {
   mode_ = MODE_RELATIVE;
-  printf("%s: delta %f radians\n", __func__, delta_radians);
+  // printf("%s: delta %f radians\n", __func__, delta_radians);
   delta_radians_ = delta_radians;
   double position_radians = joint_->Position(axis_);
   target_angle_radians_ = position_radians + delta_radians_;
-  printf(
-    "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
-    __func__, position_radians, target_angle_radians_, delta_radians_);
+  // printf(
+  //   "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
+  //   __func__, position_radians, target_angle_radians_, delta_radians_);
 }
 
 void SimpleMotor::MoveAbsolute(double new_position_radians)
@@ -135,7 +135,7 @@ void SimpleMotor::MoveAbsolute(double new_position_radians)
   // The tricky thing about this is that the new position should be in the
   // range -PI radians to +PI radians.
   mode_ = MODE_ABSOLUTE;
-  printf("%s: new position %f radians\n", __func__, new_position_radians);
+  // printf("%s: new position %f radians\n", __func__, new_position_radians);
   // Set the target angle.
   target_angle_radians_ = new_position_radians;
 
@@ -145,9 +145,9 @@ void SimpleMotor::MoveAbsolute(double new_position_radians)
 
   // The delta is the difference between the two values.
   delta_radians_ = new_position_radians - position_radians_modulo;
-  printf(
-    "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
-    __func__, position_radians, target_angle_radians_, delta_radians_);
+  // printf(
+  //   "%s: position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
+  //   __func__, position_radians, target_angle_radians_, delta_radians_);
 }
 
 void SimpleMotor::SetSpeed(double new_rpm)
@@ -181,7 +181,8 @@ void SimpleMotor::UpdatePosition()
   double next_position_radians = 0.0;
   double position_radians = joint_->Position(axis_);
   if (mode_ == MODE_ABSOLUTE) {
-    position_radians = fmod(position_radians, M_PI);
+    // The 0.0001 is there to deal with rounding errors that caused oscillation.
+    position_radians = fmod(position_radians, M_PI + 0.0001);
   }
   double absolute_difference_radians = abs(target_angle_radians_ - position_radians);
   if (absolute_difference_radians < max_change_radians_) {
@@ -199,11 +200,14 @@ void SimpleMotor::UpdatePosition()
       next_position_radians = position_radians + max_change_radians_;
       delta_radians_ -= max_change_radians_;
     }
+    // Only move if there a need to.
+    joint_->SetPosition(axis_, next_position_radians);
   }
-  printf(
-    "%s: next_position_radians %f, target_angle_radians_ %f, delta_radians_ %f\n",
-    __func__, next_position_radians, target_angle_radians_, delta_radians_);
-  joint_->SetPosition(axis_, next_position_radians);
+  // printf(
+  //   "%s: absolute_difference_radians %f, next_position_radians %f,"
+  //   " target_angle_radians_ %f, delta_radians_ %f\n",
+  //   __func__, absolute_difference_radians, next_position_radians,
+  //   target_angle_radians_, delta_radians_);
 }
 
 void SimpleMotor::UpdateSpeed()
@@ -247,12 +251,6 @@ void SimpleMotor::UpdateSpeed()
       }
     }
   }
-  // HACK
-  double position_radians = joint_->Position(axis_);
-  printf(
-    "%s: position_radians %f\n",
-    __func__, position_radians);
-
   // Update the joint velocity.
   double new_rad_s = next_rpm / 9.55;
   joint_->SetVelocity(axis_, new_rad_s);

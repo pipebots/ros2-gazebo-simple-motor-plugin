@@ -269,7 +269,67 @@ A quick modification solved that problem and both modes work correctly.
 ### Test/example program
 
 The motor now needs a test program to verify the operation of the motor and to
-demonstrate how it should be used.
+demonstrate how it should be used.  Realised that the program could be very
+simple so it was pretty straight forward to write.
+
+Found this problem during testing.
+
+```text
+[INFO] [1607465016.592714465] [test.simple_motor]: Received: mode 0, rpm 0.000000, angle_radians -3.141593
+MoveAbsolute: new position -3.141593 radians
+MoveAbsolute: position_radians -0.000001, target_angle_radians_ -3.141593, delta_radians_ -3.141592
+UpdatePosition: next_position_radians -0.314001, target_angle_radians_ -3.141593, delta_radians_ -2.827592
+UpdatePosition: next_position_radians -0.628003, target_angle_radians_ -3.141593, delta_radians_ -2.513592
+UpdatePosition: next_position_radians -0.942002, target_angle_radians_ -3.141593, delta_radians_ -2.199592
+UpdatePosition: next_position_radians -1.256002, target_angle_radians_ -3.141593, delta_radians_ -1.885592
+UpdatePosition: next_position_radians -1.570000, target_angle_radians_ -3.141593, delta_radians_ -1.571592
+UpdatePosition: next_position_radians -1.884003, target_angle_radians_ -3.141593, delta_radians_ -1.257592
+UpdatePosition: next_position_radians -2.198004, target_angle_radians_ -3.141593, delta_radians_ -0.943592
+UpdatePosition: next_position_radians -2.512005, target_angle_radians_ -3.141593, delta_radians_ -0.629592
+UpdatePosition: next_position_radians -2.826008, target_angle_radians_ -3.141593, delta_radians_ -0.315592
+UpdatePosition: next_position_radians -3.140011, target_angle_radians_ -3.141593, delta_radians_ -0.001592
+UpdatePosition: next_position_radians -3.141593, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians -3.141593, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.313998, target_angle_radians_ -3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians 0.000000, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.313997, target_angle_radians_ -3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians -0.000004, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.313997, target_angle_radians_ -3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians -0.000001, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.313998, target_angle_radians_ -3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians -0.000003, target_angle_radians_ -3.141593, delta_radians_ 0.000000
+[INFO] [1607465018.590537689] [test.simple_motor]: Received: mode 0, rpm 0.000000, angle_radians 3.141593
+MoveAbsolute: new position 3.141593 radians
+MoveAbsolute: position_radians -0.000003, target_angle_radians_ 3.141593, delta_radians_ 3.141596
+UpdatePosition: next_position_radians 0.313999, target_angle_radians_ 3.141593, delta_radians_ 2.827596
+UpdatePosition: next_position_radians 0.627999, target_angle_radians_ 3.141593, delta_radians_ 2.513596
+UpdatePosition: next_position_radians 0.941997, target_angle_radians_ 3.141593, delta_radians_ 2.199596
+UpdatePosition: next_position_radians 1.255992, target_angle_radians_ 3.141593, delta_radians_ 1.885596
+UpdatePosition: next_position_radians 1.569990, target_angle_radians_ 3.141593, delta_radians_ 1.571596
+UpdatePosition: next_position_radians 1.883993, target_angle_radians_ 3.141593, delta_radians_ 1.257596
+UpdatePosition: next_position_radians 2.197994, target_angle_radians_ 3.141593, delta_radians_ 0.943596
+UpdatePosition: next_position_radians 2.511995, target_angle_radians_ 3.141593, delta_radians_ 0.629596
+UpdatePosition: next_position_radians 2.825999, target_angle_radians_ 3.141593, delta_radians_ 0.315596
+UpdatePosition: next_position_radians 3.140002, target_angle_radians_ 3.141593, delta_radians_ 0.001596
+UpdatePosition: next_position_radians 3.141593, target_angle_radians_ 3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 3.141593, target_angle_radians_ 3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.314002, target_angle_radians_ 3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians 0.000001, target_angle_radians_ 3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.314003, target_angle_radians_ 3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians 0.000004, target_angle_radians_ 3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.314003, target_angle_radians_ 3.141593, delta_radians_ -0.314000
+UpdatePosition: next_position_radians 0.000002, target_angle_radians_ 3.141593, delta_radians_ 0.000000
+UpdatePosition: next_position_radians 0.314004, target_angle_radians_ 3.141593, delta_radians_ -0.314000
+[INFO] [1607465020.590603391] [test.simple_motor]: Received: mode 0, rpm 0.000000, angle_radians -3.000000
+MoveAbsolute: new position -3.000000 radians
+MoveAbsolute: position_radians 0.314005, target_angle_radians_ -3.000000, delta_radians_ -3.314005
+```
+
+This is only happens on absolute angle changes for -ve and -ve values of PI.
+The motor moves to the correct position then jumps to near 0.  This was caused
+by a floating point rounding error that occurred when the value returned by the
+joint was slightly larger than + or - PI.  Fixed by adding a small value to
+the fmod().
 
 ## Conclusion
 

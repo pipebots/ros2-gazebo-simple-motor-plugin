@@ -24,17 +24,18 @@ SOFTWARE.
 
 #include <cmath>
 #include <memory>
+#include <string>
 #include <thread>
-#include <rclcpp/rclcpp.hpp>
-#include <gazebo_ros_simple_motor_msgs/msg/motor_control.hpp>
+#include "rclcpp/rclcpp.hpp"
+#include "gazebo_ros_simple_motor_msgs/msg/motor_control.hpp"
 
 
 /// This delay is set to the smallest value that allows the tests to pass every time.
 static const std::chrono::milliseconds kConnectionDelayMs(250);
 /// This controls the timer callback rate.
-static const std::chrono::milliseconds kPublisherDelayMs(2000);
+static const std::chrono::milliseconds kPublisherDelayMs(2500);
 /// The topic name to use to test the plugin.
-static const std::string kTopicName("/test/cmd_motor");
+static const char kTopicName[] = "/test/cmd_motor";
 
 
 class TestPublisher : public rclcpp::Node
@@ -169,8 +170,8 @@ private:
         // Check angle is ignored.
         message->angle_radians = 1.0;
         message->rpm = 0.0;
-        // Reset count.
-        count_ = 0;
+        // Reset count.  -1 as incremented after call.
+        count_ = -1;
         break;
     }
   }
