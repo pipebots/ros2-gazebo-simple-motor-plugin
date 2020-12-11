@@ -49,35 +49,16 @@ cd ~/ws
 ```
 
 You should now be able to start Gazebo using `gazebo --verbose` and to add
-the test cam model in to the empty world from the insert menu.
+the `test motor` model in to the empty world from the insert menu.
 
-After adding an instance of the test cam model, the plugin should start and
-produce output similar to this:
+After adding an instance of the model, the plugin should start and produce
+output similar to this:
 
 ```text
 [INFO] [1606819477.922987992] [gazebo_ros_node]: ROS was initialized without arguments.
 [INFO] [1606819477.954836133] [simple_motor]: Subscribed to [/cmd_motor]
 [INFO] [1606819477.955216037] [simple_motor]: Attached to Gazebo
 ```
-
-To test the plugin subscriber from the command line, open another terminal and
-attach to the docker.  Then run one or more of these commands:
-
-```bash
-cd ~/ws
-. ./install/local_setup.bash
-$ ros2 topic list
-/clock
-/test/cmd_motor
-/parameter_events
-/rosout
-$ ros2 topic info /test/cmd_motor
-Type: gazebo_ros_simple_motor_msgs/msg/MotorControl
-Publisher count: 0
-Subscription count: 1
-$ ros2 topic pub --once /test/cmd_motor gazebo_ros_simple_motor_msgs/msg/MotorControl '{"mode": 2, "rpm": 100}'
-publisher: beginning loop
-publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(mode=2, angle_radians=0.0, rpm=100.0)```
 
 ## References
 
