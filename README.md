@@ -7,11 +7,11 @@ velocity or the position can be set using the ROS message.
 Please let me know if you find any problems with the documentation or code by
 creating an GitHub issue or if you find and fix a problem, add a pull request.
 
-__Important note__: Gazebo needs a PC with a decent graphics card to run at a
+__Important note__: Gazebo needs a PC with a good graphics card to run at a
 decent frame rate.  The minimum specification is stated as "a graphics card
 with 4GB of RAM or greater".  The laptop I'm using has an NVidia Quadro M2000M
-and is able to simulate simple models at 60FPS although it struggles with
-large scale simulations.
+with 4GB RAM and is able to simulate simple models at 60FPS although it
+struggles with large scale simulations.
 
 Docker commands used for development may be found in this
 [read me file](docker/README.md).
@@ -37,35 +37,16 @@ the command line.  Hint: use these first!
 . /usr/share/gazebo/setup.sh
 ```
 
-### Install the plugin
+### Add the packages to your project
 
-Before trying to use the plugin, you need to tell Gazebo where to find the
-model and the plugin.  The model can be found here `models/test_motor` and
-the libraries here `release`.
-
-__NOTE__: These exports are examples and need modifying for your setup.
-
-```bash
-MY_MODEL_PATH=~/ws/models
-MY_PLUGIN_PATH=~/ws/release/gazebo_ros_simple_motor/lib:
-MY_PLUGIN_PATH+=~/ws/release/gazebo_ros_simple_motor_msgs/lib:
-export GAZEBO_MODEL_PATH=${MY_MODEL_PATH}:${GAZEBO_MODEL_PATH}
-export GAZEBO_PLUGIN_PATH=${MY_PLUGIN_PATH}:${GAZEBO_PLUGIN_PATH}
-export LD_LIBRARY_PATH=${MY_PLUGIN_PATH}:${LD_LIBRARY_PATH}
-```
-
-Start Gazebo using `gazebo --verbose` and add the `test_motor` model on the
-insert menu in to the empty world.  The plugin should start and
-produce output similar to this:
-
-```text
-[INFO] [1606819477.922987992] [gazebo_ros_node]: ROS was initialized without arguments.
-[INFO] [1606819477.954836133] [simple_motor]: Subscribed to [/cmd_motor]
-[INFO] [1606819477.955216037] [simple_motor]: Attached to Gazebo
-...
-```
+The easiest way to use the plugin is to add the two packages,
+`gazebo_ros_simple_motor` and `gazebo_ros_simple_motor_msgs`, to your existing
+project.  Clone this repo in your workspace `src` directory, then build.
+The plugin packages should be built and you should be good to go.
 
 ### Testing the plugin
+
+Start Gazebo
 
 To test the plugin using ROS2 commands, run one or more of these commands:
 
@@ -92,3 +73,33 @@ publishing #1: gazebo_ros_simple_motor_msgs.msg.MotorControl(mode=2, angle_radia
 Using the Docker scripts involves many extra undocumented steps.
 
 The released libraries have only been tested in my docker.
+
+### Install the plugin from binaries
+
+__FIXME These instructions don't work for some reason.  Need to retest and fix.__
+
+Before trying to use the plugin, you need to tell Gazebo where to find the
+model and the plugin.  The model can be found here `models/test_motor` and
+the libraries here `release`.
+
+__NOTE__: These exports are examples and need modifying for your setup.
+
+```bash
+MY_MODEL_PATH=~/ws/models
+MY_PLUGIN_PATH=~/ws/release/gazebo_ros_simple_motor/lib:
+MY_PLUGIN_PATH+=~/ws/release/gazebo_ros_simple_motor_msgs/lib:
+export GAZEBO_MODEL_PATH=${MY_MODEL_PATH}:${GAZEBO_MODEL_PATH}
+export GAZEBO_PLUGIN_PATH=${MY_PLUGIN_PATH}:${GAZEBO_PLUGIN_PATH}
+export LD_LIBRARY_PATH=${MY_PLUGIN_PATH}:${LD_LIBRARY_PATH}
+```
+
+Start Gazebo using `gazebo --verbose` and add the `test_motor` model on the
+insert menu in to the empty world.  The plugin should start and
+produce output similar to this:
+
+```text
+[INFO] [1606819477.922987992] [gazebo_ros_node]: ROS was initialized without arguments.
+[INFO] [1606819477.954836133] [simple_motor]: Subscribed to [/cmd_motor]
+[INFO] [1606819477.955216037] [simple_motor]: Attached to Gazebo
+...
+```
