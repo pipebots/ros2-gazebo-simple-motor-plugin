@@ -4,9 +4,6 @@ A ROS2 Gazebo plugin that drives controls a specified joint to simulate
 a motor.  The simulation of the motor is simple as only the rotational
 velocity or the position can be set using the ROS message.
 
-Please let me know if you find any problems with the documentation or code by
-creating an GitHub issue or if you find and fix a problem, add a pull request.
-
 __Important note__: Gazebo needs a PC with a good graphics card to run at a
 decent frame rate.  The minimum specification is stated as "a graphics card
 with 4GB of RAM or greater".  The laptop I'm using has an NVidia Quadro M2000M
@@ -103,3 +100,11 @@ produce output similar to this:
 [INFO] [1606819477.955216037] [simple_motor]: Attached to Gazebo
 ...
 ```
+
+## Acknowledgments
+
+This work is supported by the UK's Engineering and Physical Sciences Research Council (EPSRC) Programme Grant EP/S016813/1
+
+© 2020,2025 University of Leeds.
+
+The author, A. Blight, has asserted his moral rights.
